@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Routes, Route, useMatch, Link, Navigate } from 'react-router-dom'
+import NewProjectForm from './components/NewProjectForm'
 
 import './App.css'
 
@@ -7,8 +9,31 @@ function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-svh">
-      <Button>Click me</Button>
+    <div className="flex flex-col items-center min-h-svh">
+      <div>
+        <Button asChild>
+          <Link to="/">Home</Link>
+        </Button>
+        <Button asChild>
+          <Link to="/projects">Projects</Link>
+        </Button>
+        <Button asChild>
+          <Link to="/login">Login</Link>
+        </Button>
+        <Button asChild>
+          <Link to="/add">Add</Link>
+        </Button>
+        <div>
+          <Routes>
+            <Route path="/" element={<div>Home</div>} />
+            <Route path="/projects" element={<div>Projects</div>} />
+            <Route path="/projects/:id" element={<div>Project Details</div>} />
+            <Route path="/add" element={<NewProjectForm />} />
+            <Route path="/login" element={<div>Login</div>} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
+      </div>
     </div>
   )
 }
