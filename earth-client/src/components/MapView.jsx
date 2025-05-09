@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   MapContainer,
   TileLayer,
@@ -8,44 +8,45 @@ import {
 } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 
-const MapClickHandler = () => {
+const MapClickHandler = ({ setLocation, location }) => {
   const map = useMapEvents({
     click: (event) => {
       const { lat, lng } = event.latlng
+      setLocation([lat, lng])
       console.log('Map clicked at:', lat, lng)
     },
   })
 
-  return null
+  if (location) {
+    return (
+      <Marker position={location}>
+        <Popup>
+          You clicked here: {location ? location.join(', ') : 'Click to set'}
+        </Popup>
+      </Marker>
+    )
+  } else {
+    return null
+  }
 }
 
-const MapView = () => {
+const MapView = ({ setLocation, location }) => {
   const mapRef = useRef(null)
-  const latitude = 51.505
-  const longitude = -0.09
-
-  const handleMapClick = (event) => {
-    const { lat, lng } = event.latlng
-    console.log('Map clicked at:', lat, lng)
-  }
+  const latitude = 64.61322
+  const longitude = 26.9488
 
   return (
     <MapContainer
       center={[latitude, longitude]}
-      zoom={13}
+      zoom={6}
       ref={mapRef}
-      style={{ height: '50vh', width: '50vw', minHeight: '30rem' }}
+      style={{ height: '90vh', width: '90vw', border: '3px solid black' }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={[51.505, -0.09]}>
-        <Popup>
-          A pretty CSS3 popup. <br /> Easily customizable.
-        </Popup>
-      </Marker>
-      <MapClickHandler />
+      <MapClickHandler setLocation={setLocation} location={location} />
     </MapContainer>
   )
 }
