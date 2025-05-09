@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import MapView from './MapView'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 const projectSchema = z.object({
   name: z
@@ -40,38 +42,47 @@ const NewProjectForm = () => {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Project Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter project name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Project Description</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter project description" {...field} />
-              </FormControl>
-              <FormDescription>Optional</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Create Project</Button>
-      </form>
-    </Form>
+    <div className="flex flex-col items-center min-h-screen max-w-md mx-auto p-4">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Project Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter project name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Project Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter project description"
+                    className="resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>Optional</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">Create Project</Button>
+        </form>
+      </Form>
+      <div>
+        <MapView />
+      </div>
+    </div>
   )
 }
 
