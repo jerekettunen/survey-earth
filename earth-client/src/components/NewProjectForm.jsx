@@ -1,9 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useState, useEffect } from 'react'
+import { useMutation } from '@apollo/client'
+import { ADD_PROJECT } from '@/queries'
 import { projectSchema } from '@/utils/schemas'
 import MapView from './MapView'
-import projectService from '@/services/projects'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -20,6 +21,11 @@ import { Textarea } from '@/components/ui/textarea'
 
 const NewProjectForm = () => {
   const [location, setLocation] = useState([0, 0])
+  const [addProject] = useMutation(ADD_PROJECT, {
+    onError: (error) => {
+      console.error('Error creating project:', error)
+    },
+  })
 
   const form = useForm({
     resolver: zodResolver(projectSchema),
@@ -44,16 +50,12 @@ const NewProjectForm = () => {
       latitude: location[0],
       longitude: location[1],
     }
-    projectService
-      .create(projectData)
-      .then((response) => {
-        console.log('Project created:', response)
-        form.reset()
-        setLocation([0, 0])
-      })
-      .catch((error) => {
-        console.error('Error creating project:', error)
-      })
+
+    addProject({
+      variables: projectData,
+    })
+    form.reset()
+    setLocation([0, 0])
   }
 
   return (
@@ -91,54 +93,56 @@ const NewProjectForm = () => {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="latitude"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Latitude</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Latitude"
-                    type="number"
-                    {...field}
-                    value={location[0]}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value)
-                      if (!isNaN(value)) {
-                        setLocation([value, location[1]])
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="longitude"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Longitude</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Longitude"
-                    type="number"
-                    {...field}
-                    value={location[1]}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value)
-                      if (!isNaN(value)) {
-                        setLocation([location[0], value])
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex items-center justify-between">
+            <FormField
+              control={form.control}
+              name="latitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Latitude</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Latitude"
+                      type="number"
+                      {...field}
+                      value={location[0]}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value)
+                        if (!isNaN(value)) {
+                          setLocation([value, location[1]])
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="longitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Longitude</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Longitude"
+                      type="number"
+                      {...field}
+                      value={location[1]}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value)
+                        if (!isNaN(value)) {
+                          setLocation([location[0], value])
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <Button type="submit">Create Project</Button>
         </form>
       </Form>
