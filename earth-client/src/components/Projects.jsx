@@ -1,6 +1,8 @@
 import { useQuery } from '@apollo/client'
 import { useState } from 'react'
 import { GET_PROJECTS } from '@/queries'
+import DataTable from './DataTable'
+import { columns } from './columns'
 
 const Projects = () => {
   const { loading, error, data } = useQuery(GET_PROJECTS, {
@@ -13,18 +15,13 @@ const Projects = () => {
   console.log('Projects:', projects)
 
   return (
-    <div className="flex flex-col items-center min-h-svh">
-      <div>
-        <h1 className="text-2xl font-bold">Projects</h1>
-        <p className="text-gray-500">List of projects</p>
-      </div>
-      <div className="mt-4">
-        <ul className="list-disc">
-          <li>Project 1</li>
-          <li>Project 2</li>
-          <li>Project 3</li>
-        </ul>
-      </div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Projects</h1>
+      {error ? (
+        <p>Error: {error.message}</p>
+      ) : (
+        <DataTable columns={columns} data={projects} />
+      )}
     </div>
   )
 }
