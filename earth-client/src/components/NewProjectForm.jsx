@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useState, useEffect } from 'react'
 import { projectSchema } from '@/utils/schemas'
 import MapView from './MapView'
+import projectService from '@/services/projects'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -37,6 +38,22 @@ const NewProjectForm = () => {
 
   const onSubmit = (data) => {
     console.log('Form submitted:', data)
+    const projectData = {
+      name: data.name,
+      description: data.description,
+      latitude: location[0],
+      longitude: location[1],
+    }
+    projectService
+      .create(projectData)
+      .then((response) => {
+        console.log('Project created:', response)
+        form.reset()
+        setLocation([0, 0])
+      })
+      .catch((error) => {
+        console.error('Error creating project:', error)
+      })
   }
 
   return (

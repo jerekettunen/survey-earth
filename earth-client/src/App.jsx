@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Routes, Route, useMatch, Link, Navigate } from 'react-router-dom'
 import NewProjectForm from './components/NewProjectForm'
+import Projects from './components/Projects'
 
 import './App.css'
 
@@ -26,7 +27,7 @@ function App() {
         <div>
           <Routes>
             <Route path="/" element={<div>Home</div>} />
-            <Route path="/projects" element={<div>Projects</div>} />
+            <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<div>Project Details</div>} />
             <Route path="/add" element={<NewProjectForm />} />
             <Route path="/login" element={<div>Login</div>} />
