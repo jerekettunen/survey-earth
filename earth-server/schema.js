@@ -9,6 +9,7 @@ type Project {
 
 type Query {
   projects: [Project!]!
+  project(id: ID!): Project 
 }
 
 type Mutation {

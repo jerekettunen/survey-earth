@@ -10,6 +10,9 @@ const resolvers = {
     projects: async () => {
       return Project.find({})
     },
+    project: async (root, args) => {
+      return Project.findById(args.id)
+    },
   },
   Mutation: {
     addProject: async (root, args) => {
