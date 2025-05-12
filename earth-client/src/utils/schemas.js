@@ -19,3 +19,15 @@ export const projectSchema = z.object({
     .min(-180, { message: 'Longitude must be between -180 and 180' })
     .max(180, { message: 'Longitude must be between -180 and 180' }),
 })
+
+export const loginSchema = z.object({
+  username: z
+    .string()
+    .email({ message: 'Invalid email address' })
+    .min(1, { message: 'Username is required' })
+    .max(50, { message: 'Username must be 50 characters or less' }),
+  password: z
+    .string()
+    .min(1, { message: 'Password is required' })
+    .max(50, { message: 'Password must be 50 characters or less' }),
+})

@@ -59,7 +59,7 @@ const NewProjectForm = () => {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen max-w-md mx-auto p-4">
+    <div className="project-form">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

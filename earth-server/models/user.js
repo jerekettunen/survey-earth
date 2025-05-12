@@ -4,9 +4,11 @@ const schema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    minlength: 3,
+    isEmail: true,
+    unique: true,
+    minlength: 8,
   },
-  favoriteGenre: {
+  password: {
     type: String,
     required: true,
   },

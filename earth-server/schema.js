@@ -7,6 +7,16 @@ type Project {
   longitude: Float!
 }
 
+type User {
+  id: ID!
+  username: String!
+  password: String!
+}
+
+type Token {
+  value: String!
+}
+
 type Query {
   projects: [Project!]!
   project(id: ID!): Project 
@@ -19,6 +29,14 @@ type Mutation {
     latitude: Float!
     longitude: Float!
   ): Project
+  createUser(
+    username: String!
+    password: String!
+  ): User
+  login(
+    username: String!
+    password: String!
+  ): Token
 }
 `
 

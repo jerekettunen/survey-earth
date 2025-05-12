@@ -68,21 +68,41 @@ const start = async () => {
 
   await server.start()
 
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`)
+    next()
+  })
+
   app.use(
     '/',
-    cors(),
+    cors({
+      origin: 'http://localhost:5173',
+      credentials: true,
+    }),
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
-        const auth = req ? req.headers.authorization : null
-        if (auth && auth.startsWith('Bearer ')) {
-          const decodedToken = jwt.verify(
-            auth.substring(7),
-            process.env.JWT_SECRET
-          )
-          const currentUser = await User.findById(decodedToken.id)
-
-          return { currentUser }
+        try {
+          const auth = req ? req.headers.authorization : null
+          console.log('Authorization header:', auth)
+          if (auth && auth.startsWith('Bearer ')) {
+            try {
+              const decodedToken = jwt.verify(
+                auth.substring(7),
+                process.env.JWT_SECRET
+              )
+              const currentUser = await User.findById(decodedToken.id)
+              return { currentUser }
+            } catch (tokenError) {
+              console.error('Token verification failed:', tokenError.message)
+              // Return context without user rather than failing
+              return {}
+            }
+          }
+          return {}
+        } catch (error) {
+          console.error('Context creation error:', error)
+          return {} // Return empty context rather than failing
         }
       },
     })

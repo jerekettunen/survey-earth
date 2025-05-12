@@ -45,3 +45,19 @@ export const ADD_PROJECT = gql`
     }
   }
 `
+
+export const CREATE_USER = gql`
+  mutation CreateUser($username: String!, $password: String!) {
+    createUser(username: $username, password: $password) {
+      id
+      username
+    }
+  }
+`
+export const LOGIN = gql`
+  mutation Login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      value
+    }
+  }
+`
