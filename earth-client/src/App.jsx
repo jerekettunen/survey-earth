@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Routes, Route, useMatch, Link, Navigate } from 'react-router-dom'
 import { useApolloClient } from '@apollo/client'
 
+import { ThemeProvider } from './components/theme-provider'
+import ModeToggle from './components/mode-toggle'
 import NewProjectForm from './components/NewProjectForm'
 import Projects from './components/Projects'
 import ProjectSingle from './components/ProjectSingle'
@@ -31,44 +33,47 @@ const App = () => {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-svh">
-      <div>
-        <Button asChild>
-          <Link to="/">Home</Link>
-        </Button>
-
-        {token ? (
-          // Show these links only when logged in
-          <>
-            <Button asChild>
-              <Link to="/projects">Projects</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/add">Add Project</Link>
-            </Button>
-            <Button onClick={handleLogout}>Logout</Button>
-          </>
-        ) : (
-          // Show only login when not logged in
+    <ThemeProvider defaultTheme="system" storageKey="earth-client-theme">
+      <div className="flex flex-col items-center min-h-screen">
+        <div className="flex flex-wrap justify-center gap-4 mt-6 mb-8">
           <Button asChild>
-            <Link to="/login">Login</Link>
+            <Link to="/">Home</Link>
           </Button>
-        )}
+
+          {token ? (
+            // Show these links only when logged in
+            <>
+              <Button asChild>
+                <Link to="/projects">Projects</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/add">Add Project</Link>
+              </Button>
+              <Button onClick={handleLogout}>Logout</Button>
+            </>
+          ) : (
+            // Show only login when not logged in
+            <Button asChild>
+              <Link to="/login">Login</Link>
+            </Button>
+          )}
+          <ModeToggle />
+        </div>
+        <div className="flex flex-col items-center w-full max-w-4xl p-4">
+          <Routes>
+            <Route path="/" element={<div>Home</div>} />
+            <Route path="/projects" element={<Projects />} />
+            <Route
+              path="/projects/:id"
+              element={<ProjectSingle id={projectId} />}
+            />
+            <Route path="/add" element={<NewProjectForm />} />
+            <Route path="/login" element={<LoginForm setToken={setToken} />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
       </div>
-      <div>
-        <Routes>
-          <Route path="/" element={<div>Home</div>} />
-          <Route path="/projects" element={<Projects />} />
-          <Route
-            path="/projects/:id"
-            element={<ProjectSingle id={projectId} />}
-          />
-          <Route path="/add" element={<NewProjectForm />} />
-          <Route path="/login" element={<LoginForm setToken={setToken} />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </div>
-    </div>
+    </ThemeProvider>
   )
 }
 

@@ -16,6 +16,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+
 import { Input } from '@/components/ui/input'
 
 const LoginForm = ({ setToken }) => {
@@ -30,7 +39,10 @@ const LoginForm = ({ setToken }) => {
   })
   const [login, result] = useMutation(LOGIN, {
     onError: (error) => {
-      console.error('Error logging in:', error)
+      form.setError('username', {
+        type: 'manual',
+        message: 'Invalid username or password',
+      })
     },
     onCompleted: (data) => {
       console.log('Login successful:', data)
@@ -56,45 +68,65 @@ const LoginForm = ({ setToken }) => {
   }
 
   return (
-    <div className="login-form">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <FormDescription>
+    <div className="login-form flex justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle>Login</CardTitle>
+          <CardDescription>
             Please enter your username and password to log in.
-          </FormDescription>
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your username" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Login</Button>
-        </form>
-      </Form>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your username" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Enter your password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+        <CardFooter className="flex-col items-center gap-2">
+          <p>Don't have an account?</p>
+          <Button
+            variant="link"
+            onClick={() => {
+              navigate('/register')
+            }}
+          >
+            <strong>Register Here</strong>
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
