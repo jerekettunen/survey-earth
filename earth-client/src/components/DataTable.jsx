@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
+  getFilteredRowModel,
   getPaginationRowModel,
 } from '@tanstack/react-table'
 
@@ -14,20 +16,37 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useNavigate } from 'react-router-dom'
 
 const DataTable = ({ columns, data }) => {
   const navigate = useNavigate()
+  const [columnFilters, setColumnFilters] = useState([])
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      columnFilters,
+    },
   })
 
   return (
     <div>
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter Projects..."
+          value={table.getColumn('name')?.getFilterValue() ?? ''}
+          onChange={(event) =>
+            table.getColumn('name')?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>

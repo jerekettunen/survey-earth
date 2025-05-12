@@ -1,7 +1,7 @@
 export const columns = [
   {
     accessorKey: 'name',
-    header: 'Name',
+    header: 'Project',
   },
   {
     accessorKey: 'description',
