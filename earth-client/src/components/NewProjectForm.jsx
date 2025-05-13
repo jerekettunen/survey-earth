@@ -3,24 +3,22 @@ import { useForm } from 'react-hook-form'
 import { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { ADD_PROJECT } from '@/queries'
-import { projectSchema } from '@/utils/schemas'
+import { projectSchema, projectTypes } from '@/utils/schemas'
 import MapView from './MapView'
+import FormDatePick from './formComponents/FormDatePick'
+import FormTextField from './formComponents/FormTextField'
+import FormInput from './formComponents/FormInput'
+import FormInputChange from './formComponents/FormInputChange'
 
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
 const NewProjectForm = () => {
-  const [location, setLocation] = useState([0, 0])
+  const [latitude, setLatitude] = useState(0)
+  const [longitude, setLongitude] = useState(0)
+  const [location, setLocation] = useState([latitude, longitude])
   const [addProject] = useMutation(ADD_PROJECT, {
     onError: (error) => {
       console.error('Error creating project:', error)
@@ -32,6 +30,9 @@ const NewProjectForm = () => {
     defaultValues: {
       name: '',
       description: '',
+      startDate: '',
+      endDate: '',
+      type: projectTypes[0],
       latitude: 0,
       longitude: 0,
     },
@@ -40,7 +41,9 @@ const NewProjectForm = () => {
   useEffect(() => {
     form.setValue('latitude', location[0])
     form.setValue('longitude', location[1])
-  }, [location, form])
+    setLatitude(location[0])
+    setLongitude(location[1])
+  }, [location])
 
   const onSubmit = (data) => {
     console.log('Form submitted:', data)
@@ -50,97 +53,51 @@ const NewProjectForm = () => {
       latitude: location[0],
       longitude: location[1],
     }
-
+    /*
     addProject({
       variables: projectData,
     })
+      */
     form.reset()
-    setLocation([0, 0])
+    setLatitude(0)
+    setLongitude(0)
   }
 
   return (
     <div className="project-form">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
+          <FormInput
+            form={form}
             name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Project Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter project name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Project Name"
+            placeholder="Enter project name"
+            type="text"
           />
-          <FormField
-            control={form.control}
+          <FormTextField
+            form={form}
             name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Project Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter project description"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>Optional</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Description"
+            placeholder="Enter project description"
           />
-          <div className="flex items-center justify-between">
-            <FormField
-              control={form.control}
-              name="latitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Latitude</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Latitude"
-                      type="number"
-                      {...field}
-                      value={location[0]}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value)
-                        if (!isNaN(value)) {
-                          setLocation([value, location[1]])
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <FormDatePick form={form} name="startDate" label="Start Date" />
+          <FormDatePick form={form} name="endDate" label="End Date" />
+          <div className="flex items-center justify-center space-x-4">
+            <FormInputChange
+              form={form}
+              name="Latitude"
+              label="Latitude"
+              placeholder="Latitude"
+              number={latitude}
+              setter={setLatitude}
             />
-            <FormField
-              control={form.control}
-              name="longitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Longitude</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Longitude"
-                      type="number"
-                      {...field}
-                      value={location[1]}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value)
-                        if (!isNaN(value)) {
-                          setLocation([location[0], value])
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <FormInputChange
+              form={form}
+              name="Longitude"
+              label="Longitude"
+              placeholder="Longitude"
+              number={longitude}
+              setter={setLongitude}
             />
           </div>
           <Button type="submit">Create Project</Button>

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+export const projectTypes = ['Research', 'Monitoring', 'Historical', 'Other']
+
 export const projectSchema = z.object({
   name: z
     .string()
@@ -18,6 +20,23 @@ export const projectSchema = z.object({
     .number()
     .min(-180, { message: 'Longitude must be between -180 and 180' })
     .max(180, { message: 'Longitude must be between -180 and 180' }),
+  type: z
+    .enum(projectTypes, {
+      errorMap: () => ({ message: 'Invalid project type' }),
+    })
+    .optional(),
+  startDate: z
+    .date()
+    .refine((date) => date <= new Date(), {
+      message: 'Start date must be in the past',
+    })
+    .optional(),
+  endDate: z
+    .date()
+    .refine((date) => date >= new Date(), {
+      message: 'End date must be in the future',
+    })
+    .optional(),
 })
 
 export const loginSchema = z.object({
