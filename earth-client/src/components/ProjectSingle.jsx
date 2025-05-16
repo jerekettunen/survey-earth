@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { GET_PROJECT } from '../queries'
 import StaticMap from './StaticMap'
+import ProjectEditDialog from './ProjectEditDialog'
 
 const ProjectSingle = ({ id }) => {
   const { loading, error, data } = useQuery(GET_PROJECT, {
@@ -23,14 +24,13 @@ const ProjectSingle = ({ id }) => {
         <p>End Date: {project.endDate}</p>
         <p>Created At: {project.createdAt}</p>
       </div>
-      <div>
-        <StaticMap
-          marker={{
-            latitude: project.latitude,
-            longitude: project.longitude,
-          }}
-        />
-      </div>
+      <ProjectEditDialog project={project} />
+      <StaticMap
+        marker={{
+          latitude: project.latitude,
+          longitude: project.longitude,
+        }}
+      />
     </div>
   )
 }

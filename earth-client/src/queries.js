@@ -1,5 +1,19 @@
 import { gql } from '@apollo/client'
 
+const PROJECT_FIELDS = gql`
+  fragment ProjectFields on Project {
+    id
+    name
+    description
+    latitude
+    longitude
+    type
+    startDate
+    endDate
+    createdAt
+  }
+`
+
 export const GET_PROJECTS = gql`
   query GetProjects {
     projects {
@@ -15,17 +29,10 @@ export const GET_PROJECTS = gql`
 export const GET_PROJECT = gql`
   query GetProject($id: ID!) {
     project(id: $id) {
-      id
-      name
-      description
-      latitude
-      longitude
-      type
-      startDate
-      endDate
-      createdAt
+      ...ProjectFields
     }
   }
+  ${PROJECT_FIELDS}
 `
 
 export const ADD_PROJECT = gql`
@@ -48,6 +55,33 @@ export const ADD_PROJECT = gql`
       longitude
     }
   }
+`
+
+export const UPDATE_PROJECT = gql`
+  mutation UpdateProject(
+    $id: ID!
+    $name: String
+    $description: String
+    $latitude: Float
+    $longitude: Float
+    $type: String
+    $startDate: String
+    $endDate: String
+  ) {
+    updateProject(
+      id: $id
+      name: $name
+      description: $description
+      latitude: $latitude
+      longitude: $longitude
+      type: $type
+      startDate: $startDate
+      endDate: $endDate
+    ) {
+      ...ProjectFields
+    }
+  }
+  ${PROJECT_FIELDS}
 `
 
 export const CREATE_USER = gql`

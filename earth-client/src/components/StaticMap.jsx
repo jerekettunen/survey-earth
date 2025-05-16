@@ -1,15 +1,22 @@
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import { useEffect, useRef } from 'react'
 import 'leaflet/dist/leaflet.css'
 
 const StaticMap = ({ marker }) => {
+  const mapRef = useRef(null)
   const latitude = marker.latitude
   const longitude = marker.longitude
   const zoom = 15
   const position = [latitude, longitude]
+
+  // More responsive styling
   const mapStyle = {
-    height: '90vh',
-    width: '90vw',
-    border: '3px solid black',
+    height: '50vh', // Responsive height
+    width: '100%', // Full width of container
+    aspectRatio: '4/3', // Maintain aspect ratio
+    border: '1px solid var(--border)',
+    borderRadius: '0.5rem', // Rounded corners for better appearance
+    margin: '1rem auto',
   }
   const interactionOptions = {
     zoomControl: false,
@@ -23,12 +30,31 @@ const StaticMap = ({ marker }) => {
     scrollWheelZoom: false,
   }
 
-  console.log('StaticMap marker', marker)
-  console.log('StaticMap position', position)
-  console.log('StaticMap zoom', zoom)
+  // Make map recenter when container resizes
+  useEffect(() => {
+    if (!mapRef.current) return
+
+    const map = mapRef.current
+
+    // Function to handle resize
+    const handleResize = () => {
+      // Invalidate size recalculates dimensions
+      map.invalidateSize()
+      // Re-center the map
+      map.setView(position, zoom)
+    }
+
+    // Call once on mount and set up resize listener
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
+    // Clean up
+    return () => window.removeEventListener('resize', handleResize)
+  }, [position, zoom])
 
   return (
     <MapContainer
+      ref={mapRef}
       center={position}
       zoom={zoom}
       scrollWheelZoom={false}
@@ -43,4 +69,5 @@ const StaticMap = ({ marker }) => {
     </MapContainer>
   )
 }
+
 export default StaticMap

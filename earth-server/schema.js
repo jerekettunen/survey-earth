@@ -32,6 +32,20 @@ type Mutation {
     description: String
     latitude: Float!
     longitude: Float!
+    type: String
+    startDate: String
+    endDate: String
+  ): Project
+  updateProject(
+    id: ID!
+    name: String
+    description: String
+    latitude: Float
+    longitude: Float
+    type: String
+    startDate: String
+    endDate: String
+    createdAt: String
   ): Project
   createUser(
     username: String!

@@ -29,6 +29,35 @@ const resolvers = {
       const savedProject = await project.save()
       return savedProject
     },
+    updateProject: async (root, args, context) => {
+      const currentUser = context.currentUser
+      if (!currentUser) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        })
+      }
+
+      try {
+        const { id, ...updateData } = args
+
+        const updatedProject = await Project.findByIdAndUpdate(id, updateData, {
+          new: true,
+          runValidators: true,
+        })
+
+        if (!updatedProject) {
+          throw new GraphQLError('Project not found', {
+            extensions: { code: 'NOT_FOUND' },
+          })
+        }
+
+        return updatedProject
+      } catch (error) {
+        throw new GraphQLError(`Failed to update project: ${error.message}`, {
+          extensions: { code: 'DATABASE_ERROR' },
+        })
+      }
+    },
     createUser: async (root, args) => {
       const saltRounds = 15
       const hashPassword = await bcrypt.hash(args.password, saltRounds)
