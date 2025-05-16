@@ -45,7 +45,7 @@ const FormDatePick = ({ form, name, label }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 z-1000" align="start">
                 <Calendar
                   mode="single"
                   selected={field.value}

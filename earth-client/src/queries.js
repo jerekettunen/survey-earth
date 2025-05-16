@@ -20,6 +20,10 @@ export const GET_PROJECT = gql`
       description
       latitude
       longitude
+      type
+      startDate
+      endDate
+      createdAt
     }
   }
 `

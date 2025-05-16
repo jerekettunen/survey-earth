@@ -9,11 +9,10 @@ import FormDatePick from './formComponents/FormDatePick'
 import FormTextField from './formComponents/FormTextField'
 import FormInput from './formComponents/FormInput'
 import FormInputChange from './formComponents/FormInputChange'
+import FormDropdown from './formComponents/FormDropdown'
 
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 
 const NewProjectForm = () => {
   const [latitude, setLatitude] = useState(0)
@@ -39,6 +38,7 @@ const NewProjectForm = () => {
   })
 
   useEffect(() => {
+    console.log(projectTypes)
     form.setValue('latitude', location[0])
     form.setValue('longitude', location[1])
     setLatitude(location[0])
@@ -80,8 +80,16 @@ const NewProjectForm = () => {
             label="Description"
             placeholder="Enter project description"
           />
-          <FormDatePick form={form} name="startDate" label="Start Date" />
-          <FormDatePick form={form} name="endDate" label="End Date" />
+          <div className="flex items-center justify-center space-x-4">
+            <FormDatePick form={form} name="startDate" label="Start Date" />
+            <FormDatePick form={form} name="endDate" label="End Date" />
+          </div>
+          <FormDropdown
+            form={form}
+            name="type"
+            label="Project Type"
+            options={projectTypes}
+          />
           <div className="flex items-center justify-center space-x-4">
             <FormInputChange
               form={form}

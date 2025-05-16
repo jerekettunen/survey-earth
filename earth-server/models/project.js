@@ -19,6 +19,23 @@ const projectSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  type: {
+    type: String,
+    enum: ['Research', 'Monitoring', 'Historical', 'Other'],
+    required: false,
+  },
+  startDate: {
+    type: Date,
+    required: false,
+  },
+  endDate: {
+    type: Date,
+    required: false,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 })
 
 projectSchema.plugin(uniqueValidator)

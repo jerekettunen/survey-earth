@@ -5,6 +5,10 @@ type Project {
   description: String
   latitude: Float!
   longitude: Float!
+  type: String
+  startDate: String
+  endDate: String
+  createdAt: String
 }
 
 type User {

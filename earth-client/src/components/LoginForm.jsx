@@ -5,17 +5,10 @@ import { LOGIN } from '@/queries'
 import { loginSchema } from '@/utils/schemas'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import FormInput from './formComponents/FormInput'
 
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import {
   Card,
   CardContent,
@@ -24,8 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-
-import { Input } from '@/components/ui/input'
 
 const LoginForm = ({ setToken }) => {
   const navigate = useNavigate()
@@ -68,7 +59,7 @@ const LoginForm = ({ setToken }) => {
   }
 
   return (
-    <div className="login-form flex justify-center">
+    <div className="login-form flex justify-center w-3/5">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle>Login</CardTitle>
@@ -79,35 +70,19 @@ const LoginForm = ({ setToken }) => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
+              <FormInput
+                form={form}
                 name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your username" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Username"
+                placeholder="Enter your email address"
+                type="email"
               />
-              <FormField
-                control={form.control}
+              <FormInput
+                form={form}
                 name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter your password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Password"
+                placeholder="Enter your password"
+                type="password"
               />
               <Button type="submit" className="w-full">
                 Login

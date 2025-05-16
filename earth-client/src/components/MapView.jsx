@@ -39,6 +39,7 @@ const MapView = ({ setLocation, location }) => {
     <MapContainer
       center={[latitude, longitude]}
       zoom={6}
+      scrollWheelZoom={false}
       ref={mapRef}
       style={{ height: '90vh', width: '90vw', border: '3px solid black' }}
     >

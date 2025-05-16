@@ -9,11 +9,16 @@ import NewProjectForm from './components/NewProjectForm'
 import Projects from './components/Projects'
 import ProjectSingle from './components/ProjectSingle'
 import LoginForm from './components/LoginForm'
+import SignUpForm from './components/SignUpForm'
+
+import { Toaster } from '@/components/ui/sonner'
+import { toast } from 'sonner'
 
 import './App.css'
 
 const App = () => {
   const [token, setToken] = useState(null)
+  const [toastMessage, setToastMessage] = useState(null)
   const client = useApolloClient()
 
   const match = useMatch('/projects/:id')
@@ -24,7 +29,17 @@ const App = () => {
     if (token) {
       setToken(token)
     }
-  }, [])
+    if (toastMessage) {
+      const { title, description, duration } = toastMessage
+      toast(title, {
+        description,
+        duration: duration || 3000,
+        onOpen: () => {
+          setToastMessage(null)
+        },
+      })
+    }
+  }, [toastMessage])
 
   const handleLogout = () => {
     localStorage.clear()
@@ -69,9 +84,24 @@ const App = () => {
             />
             <Route path="/add" element={<NewProjectForm />} />
             <Route path="/login" element={<LoginForm setToken={setToken} />} />
+            <Route
+              path="/register"
+              element={<SignUpForm setToastMessage={setToastMessage} />}
+            />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
+
+        <Toaster
+          toastOptions={{
+            className: 'sonner-toast',
+            style: {
+              background: 'var(--background)',
+              color: 'var(--text)',
+            },
+          }}
+          richColors
+        />
       </div>
     </ThemeProvider>
   )

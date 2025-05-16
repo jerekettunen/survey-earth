@@ -50,3 +50,28 @@ export const loginSchema = z.object({
     .min(1, { message: 'Password is required' })
     .max(50, { message: 'Password must be 50 characters or less' }),
 })
+
+export const registerSchema = z
+  .object({
+    username: z
+      .string()
+      .email({ message: 'Invalid email address' })
+      .min(1, { message: 'Username is required' })
+      .max(50, { message: 'Username must be 50 characters or less' }),
+    password: z
+      .string()
+      .max(50, { message: 'Password must be 50 characters or less' })
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[a-zA-Z\d!@#$%^&*]{8,}$/,
+        {
+          message: 'Invalid password',
+        }
+      ),
+    confirmPassword: z
+      .string()
+      .min(1, { message: 'You need to confirm the password' }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
