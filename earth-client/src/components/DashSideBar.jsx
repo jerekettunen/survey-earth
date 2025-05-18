@@ -1,4 +1,4 @@
-import { Home, Inbox, Search, Settings, Plus } from 'lucide-react'
+import { Home, Inbox, Settings, Plus } from 'lucide-react'
 
 import {
   Sidebar,
@@ -36,7 +36,7 @@ const items = [
 ]
 const DashSideBar = () => {
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
