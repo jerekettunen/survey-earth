@@ -1,4 +1,5 @@
-import { Home, Inbox, Settings, Plus } from 'lucide-react'
+import { Home, Inbox, Settings, Plus, User2, ChevronUp } from 'lucide-react'
+import ModeToggleSide from './ModeToggleSide'
 
 import {
   Sidebar,
@@ -9,7 +10,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
 } from '@/components/ui/sidebar'
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
 
 // Menu items.
 const items = [
@@ -34,7 +43,7 @@ const items = [
     icon: Settings,
   },
 ]
-const DashSideBar = () => {
+const DashSideBar = ({ handleLogout }) => {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
@@ -56,6 +65,32 @@ const DashSideBar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <ModeToggleSide />
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <User2 /> Username
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                className="w-[--radix-popper-anchor-width]"
+              >
+                <DropdownMenuItem>
+                  <span>Account</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
