@@ -12,6 +12,7 @@ import LoginForm from '@/components/LoginForm'
 import SignUpForm from '@/components/SignUpForm'
 import DashSideBar from '@/components/DashSideBar'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import { ProjectRoleProvider } from '@/components/Providers/ProjectRoleProvider'
 
 const AppContent = () => {
   const { isAuthenticated, logout } = useAuth()
@@ -62,7 +63,9 @@ const AppContent = () => {
               path="/projects/:id"
               element={
                 <ProtectedRoute>
-                  <ProjectSingle id={projectId} />
+                  <ProjectRoleProvider>
+                    <ProjectSingle id={projectId} />
+                  </ProjectRoleProvider>
                 </ProtectedRoute>
               }
             />

@@ -60,6 +60,22 @@ type Mutation {
     endDate: String
     createdAt: String
   ): Project
+  addCollaborator(
+    projectId: ID!
+    email: String!
+    role: String!
+  ): Project
+  removeCollaborator(
+    projectId: ID!
+    userId: ID!
+  ): Project
+  updateCollaboratorRole(
+    projectId: ID!
+    userId: ID!
+    role: String!
+  ): Project
+  deleteProject(id: ID!): Project
+  deleteUser(id: ID!): User
   createUser(
     username: String!
     password: String!

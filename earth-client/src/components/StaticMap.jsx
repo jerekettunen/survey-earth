@@ -1,6 +1,17 @@
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import { useEffect, useRef } from 'react'
 import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
+import icon from 'leaflet/dist/images/marker-icon.png'
+import iconShadow from 'leaflet/dist/images/marker-shadow.png'
+
+const DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+})
+L.Marker.prototype.options.icon = DefaultIcon
 
 const StaticMap = ({ marker }) => {
   const mapRef = useRef(null)
@@ -9,14 +20,10 @@ const StaticMap = ({ marker }) => {
   const zoom = 15
   const position = [latitude, longitude]
 
-  // More responsive styling
   const mapStyle = {
-    height: '50vh', // Responsive height
-    width: '100%', // Full width of container
-    aspectRatio: '4/3', // Maintain aspect ratio
-    border: '1px solid var(--border)',
-    borderRadius: '0.5rem', // Rounded corners for better appearance
-    margin: '1rem auto',
+    height: '100%', // Match the parent's height
+    width: '100%', // Full width
+    borderRadius: 'inherit',
   }
   const interactionOptions = {
     zoomControl: false,
@@ -33,6 +40,11 @@ const StaticMap = ({ marker }) => {
   // Make map recenter when container resizes
   useEffect(() => {
     if (!mapRef.current) return
+
+    setTimeout(() => {
+      mapRef.current.invalidateSize()
+      mapRef.current.setView(position, zoom)
+    }, 100)
 
     const map = mapRef.current
 

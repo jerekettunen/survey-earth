@@ -51,14 +51,9 @@ const ProjectEditDialog = ({ project }) => {
     },
   })
 
-  useEffect(() => {
-    console.log('Form state:', form.formState)
-    console.log('Form values:', form.getValues())
-    console.log('Form errors:', form.formState.errors)
-  }, [form.formState])
+  useEffect(() => {}, [form.formState])
 
   const onSubmit = (data) => {
-    console.log('Form submitted:', data)
     const updateProjectData = {
       name: data.name,
       description: data.description,

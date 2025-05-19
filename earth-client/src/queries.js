@@ -8,9 +8,21 @@ const PROJECT_FIELDS = gql`
     latitude
     longitude
     type
+    status
     startDate
     endDate
     createdAt
+    owner {
+      id
+      username
+    }
+    collaborators {
+      user {
+        id
+        username
+      }
+      role
+    }
   }
 `
 
@@ -102,6 +114,68 @@ export const LOGIN = gql`
   mutation Login($username: String!, $password: String!) {
     login(username: $username, password: $password) {
       value
+    }
+  }
+`
+
+export const DELETE_PROJECT = gql`
+  mutation DeleteProject($id: ID!) {
+    deleteProject(id: $id) {
+      id
+      name
+    }
+  }
+`
+export const ADD_COLLABORATOR = gql`
+  mutation AddCollaborator($projectId: ID!, $email: String!, $role: String!) {
+    addCollaborator(projectId: $projectId, email: $email, role: $role) {
+      id
+      name
+      collaborators {
+        user {
+          id
+          username
+        }
+        role
+      }
+    }
+  }
+`
+export const REMOVE_COLLABORATOR = gql`
+  mutation RemoveCollaborator($projectId: ID!, $userId: ID!) {
+    removeCollaborator(projectId: $projectId, userId: $userId) {
+      id
+      name
+      collaborators {
+        user {
+          id
+          username
+        }
+        role
+      }
+    }
+  }
+`
+export const UPDATE_COLLABORATOR_ROLE = gql`
+  mutation UpdateCollaboratorRole(
+    $projectId: ID!
+    $userId: ID!
+    $role: String!
+  ) {
+    updateCollaboratorRole(
+      projectId: $projectId
+      userId: $userId
+      role: $role
+    ) {
+      id
+      name
+      collaborators {
+        user {
+          id
+          username
+        }
+        role
+      }
     }
   }
 `

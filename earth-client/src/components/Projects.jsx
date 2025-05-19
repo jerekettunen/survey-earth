@@ -12,7 +12,6 @@ const Projects = () => {
   if (loading) return <p>Loading...</p>
 
   const projects = data.projects
-  console.log('Projects:', projects)
 
   return (
     <div className="container mx-auto p-4">
