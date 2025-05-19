@@ -18,11 +18,11 @@ import { useEffect } from 'react'
 
 import { projectUpdateSchema } from '@/utils/schemas'
 import { projectTypes } from '@/utils/schemas'
-import FormDatePick from './formComponents/FormDatePick'
-import FormTextField from './formComponents/FormTextField'
-import FormInput from './formComponents/FormInput'
-import FormInputChange from './formComponents/FormInputChange'
-import FormDropdown from './formComponents/FormDropdown'
+import FormDatePick from '../formComponents/FormDatePick'
+import FormTextField from '../formComponents/FormTextField'
+import FormInput from '../formComponents/FormInput'
+import FormInputChange from '../formComponents/FormInputChange'
+import FormDropdown from '../formComponents/FormDropdown'
 
 const ProjectEditDialog = ({ project }) => {
   const [updateProject] = useMutation(UPDATE_PROJECT, {

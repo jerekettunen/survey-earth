@@ -38,7 +38,6 @@ const NewProjectForm = () => {
   })
 
   useEffect(() => {
-    console.log(projectTypes)
     form.setValue('latitude', location[0])
     form.setValue('longitude', location[1])
     setLatitude(location[0])
@@ -52,12 +51,13 @@ const NewProjectForm = () => {
       description: data.description,
       latitude: location[0],
       longitude: location[1],
+      type: data.type,
+      startDate: data.startDate,
+      endDate: data.endDate,
     }
-    /*
     addProject({
       variables: projectData,
     })
-      */
     form.reset()
     setLatitude(0)
     setLongitude(0)

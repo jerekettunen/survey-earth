@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 export const projectTypes = ['Research', 'Monitoring', 'Historical', 'Other']
+export const userRoles = ['Viewer', 'Editor', 'Admin']
 
 export const projectSchema = z.object({
   name: z
@@ -92,3 +93,11 @@ export const registerSchema = z
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   })
+
+export const collaboratorSchema = z.object({
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  role: z.enum(userRoles, {
+    required_error: 'Please select a role',
+    invalid_type_error: 'Role must be one of the predefined types',
+  }),
+})

@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/form'
 
 const FormDropdown = ({ form, label, options, name }) => {
-  console.log('FormDropdown', options)
   return (
     <FormField
       control={form.control}

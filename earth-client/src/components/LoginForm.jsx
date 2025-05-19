@@ -3,9 +3,11 @@ import { useForm } from 'react-hook-form'
 import { useMutation } from '@apollo/client'
 import { LOGIN } from '@/queries'
 import { loginSchema } from '@/utils/schemas'
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import FormInput from './formComponents/FormInput'
+import { useAuth } from '@/components/Providers/AuthProvider'
+import { useToast } from '@/components/Providers/ToastProvider'
 
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
@@ -18,8 +20,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-const LoginForm = ({ setToken }) => {
+const LoginForm = () => {
   const navigate = useNavigate()
+  const { login: authLogin } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const { showError, showSuccess } = useToast()
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -28,29 +33,32 @@ const LoginForm = ({ setToken }) => {
       password: '',
     },
   })
-  const [login, result] = useMutation(LOGIN, {
+  const [loginMutation] = useMutation(LOGIN, {
     onError: (error) => {
       form.setError('username', {
         type: 'manual',
         message: 'Invalid username or password',
       })
+      setLoading(false)
+      showError('Invalid username or password', {
+        description: 'Please check your credentials and try again.',
+        duration: 5000,
+      })
     },
     onCompleted: (data) => {
-      console.log('Login successful:', data)
+      const token = data.login.value
+      authLogin(token) // Use context method
       navigate('/projects')
+      showSuccess('Login successful', {
+        description: 'Welcome back! You are now logged in.',
+        duration: 5000,
+      })
     },
   })
 
-  useEffect(() => {
-    if (result.data) {
-      const token = result.data.login.value
-      localStorage.setItem('user-token', token)
-      setToken(token)
-    }
-  }, [result.data])
-
   const onSubmit = async (data) => {
-    login({
+    setLoading(true)
+    loginMutation({
       variables: {
         username: data.username,
         password: data.password,
@@ -84,8 +92,8 @@ const LoginForm = ({ setToken }) => {
                 placeholder="Enter your password"
                 type="password"
               />
-              <Button type="submit" className="w-full">
-                Login
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Logging in...' : 'Login'}
               </Button>
             </form>
           </Form>

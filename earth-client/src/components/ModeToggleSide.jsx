@@ -1,4 +1,4 @@
-import { useTheme } from '@/components/theme-provider'
+import { useTheme } from '@/components/Providers/ThemeProvider'
 import { Moon, Sun } from 'lucide-react'
 
 import { SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'

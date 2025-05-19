@@ -84,7 +84,6 @@ const start = async () => {
       context: async ({ req }) => {
         try {
           const auth = req ? req.headers.authorization : null
-          console.log('Authorization header:', auth)
           if (auth && auth.startsWith('Bearer ')) {
             try {
               const decodedToken = jwt.verify(

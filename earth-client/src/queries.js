@@ -41,12 +41,18 @@ export const ADD_PROJECT = gql`
     $description: String
     $latitude: Float!
     $longitude: Float!
+    $type: String
+    $startDate: String
+    $endDate: String
   ) {
     addProject(
       name: $name
       description: $description
       latitude: $latitude
       longitude: $longitude
+      type: $type
+      startDate: $startDate
+      endDate: $endDate
     ) {
       id
       name

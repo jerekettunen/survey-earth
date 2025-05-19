@@ -12,6 +12,18 @@ const schema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  ownedProjects: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+    },
+  ],
+  joinedProjects: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+    },
+  ],
 })
 
 module.exports = mongoose.model('User', schema)

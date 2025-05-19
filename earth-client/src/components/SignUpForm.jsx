@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useToast } from '@/components/Providers/ToastProvider'
 import { useMutation } from '@apollo/client'
 import { CREATE_USER } from '@/queries'
 import { registerSchema } from '@/utils/schemas'
@@ -17,8 +18,9 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-const SignUpForm = ({ setToastMessage }) => {
+const SignUpForm = () => {
   const navigate = useNavigate()
+  const { showSuccess, showError } = useToast()
 
   const form = useForm({
     resolver: zodResolver(registerSchema),
@@ -34,12 +36,15 @@ const SignUpForm = ({ setToastMessage }) => {
         type: 'manual',
         message: 'Username already exists',
       })
+      showError('Username already exists', {
+        description: 'Please choose a different username.',
+        duration: 5000,
+      })
     },
     onCompleted: (data) => {
       console.log('User created successfully:', data)
-      setToastMessage({
-        title: 'Account created successfully',
-        description: 'You can now log in to your account.',
+      showSuccess('User created successfully', {
+        description: 'You can now log in with your new account.',
         duration: 5000,
       })
       navigate('/login')
