@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client'
 import { useState } from 'react'
 import { GET_PROJECTS } from '@/queries'
 import DataTable from './DataTable'
-import { columns } from './columns'
+import { columns } from './Columns'
 
 const Projects = () => {
   const { loading, error, data } = useQuery(GET_PROJECTS, {
