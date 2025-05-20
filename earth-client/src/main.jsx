@@ -18,6 +18,8 @@ import { getMainDefinition } from '@apollo/client/utilities'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('user-token')
   return {
@@ -50,10 +52,14 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 })
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: `${API_URL}/graphql`,
 })
 
-const wsLink = new GraphQLWsLink(createClient({ url: 'ws://localhost:4000' }))
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: API_URL.replace('http://', 'ws://').replace('https://', 'wss://'),
+  })
+)
 
 const httpAuthLink = from([errorLink, authLink, httpLink])
 
