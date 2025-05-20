@@ -132,7 +132,6 @@ const CollabDialogue = ({ project }) => {
       },
     })
   }
-  console.log('collaborators', collaborators)
 
   return (
     <Dialog>

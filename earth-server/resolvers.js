@@ -1,5 +1,9 @@
 const { GraphQLError, GraphQLScalarType, Kind } = require('graphql')
-const { getAvailableImages, generateImageUrl } = require('./utils/SentinelHub')
+const {
+  getAvailableImages,
+  generateImageUrl,
+  generateThumbnailUrl,
+} = require('./utils/SentinelHub')
 const {
   convertGeoJSONToBBox,
   createBBoxFromLatLong,
@@ -93,10 +97,50 @@ const baseResolvers = {
           bandCombination: 'TRUE_COLOR',
         })
 
-        return images.map((img) => ({
-          ...img,
-          projectId,
-        }))
+        const maxImagesToProcess = Math.min(images.length, 20)
+        console.log(
+          `Generating thumbnails for ${maxImagesToProcess} out of ${images.length} images`
+        )
+
+        // Process images with thumbnails
+        const processedImages = await Promise.all(
+          images.slice(0, maxImagesToProcess).map(async (img) => {
+            try {
+              // Generate thumbnail for this image
+              const thumbnail = await generateThumbnailUrl({
+                imageId: img.id,
+                bbox,
+                bandCombination: 'TRUE_COLOR',
+                width: 128,
+                height: 128,
+              })
+              return {
+                ...img,
+                thumbnail,
+                projectId,
+              }
+            } catch (err) {
+              console.error(
+                `Failed to generate thumbnail for image ${img.id}:`,
+                err.message
+              )
+              // Return the image without thumbnail if generation fails
+              return {
+                ...img,
+                projectId,
+              }
+            }
+          })
+        )
+
+        // Return processed images first, then any remaining images without thumbnails
+        return [
+          ...processedImages,
+          ...images.slice(maxImagesToProcess).map((img) => ({
+            ...img,
+            projectId,
+          })),
+        ]
       } catch (error) {
         console.error(
           `Error fetching satellite images for project ${projectId}:`,
@@ -107,6 +151,7 @@ const baseResolvers = {
         })
       }
     },
+
     getSatelliteImage: async (root, args) => {
       const { imageId, projectId, bandCombination = 'TRUE_COLOR' } = args
 
@@ -135,13 +180,14 @@ const baseResolvers = {
         })
 
         // Generate thumbnail
-        const thumbnail = await generateImageUrl({
+        const thumbnail = await generateThumbnailUrl({
           imageId,
           bbox,
           bandCombination,
           width: 128,
           height: 128,
         })
+        console.log(`Successfully generated image and thumbnail for ${imageId}`)
 
         return {
           id: imageId,
@@ -559,7 +605,7 @@ const customResolvers = {
         })
 
         // Generate thumbnail
-        const thumbnail = await generateImageUrl({
+        const thumbnail = await generateThumbnailUrl({
           imageId: latestImage.id,
           bbox,
           bandCombination,

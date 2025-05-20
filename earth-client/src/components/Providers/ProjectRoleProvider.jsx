@@ -58,7 +58,6 @@ export const ProjectRoleProvider = ({ children }) => {
     manage: userRole === 'Admin' || isOwner,
     delete: isOwner, // Only owner can delete project
   }
-  console.log('can', can)
   return (
     <ProjectRoleContext.Provider
       value={{

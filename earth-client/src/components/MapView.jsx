@@ -13,7 +13,6 @@ const MapClickHandler = ({ setLocation, location }) => {
     click: (event) => {
       const { lat, lng } = event.latlng
       setLocation([lat, lng])
-      console.log('Map clicked at:', lat, lng)
     },
   })
 

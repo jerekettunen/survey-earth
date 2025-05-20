@@ -169,7 +169,6 @@ const generateImageUrl = async ({
       fromDate = imageId
       toDate = imageId
 
-      // If it appears to be a catalog ID and not a date, use a fallback date range
       if (!fromDate.match(/^\d{4}-\d{2}-\d{2}/)) {
         // Use last 30 days as fallback
         toDate = new Date().toISOString().split('T')[0]
@@ -216,7 +215,6 @@ const generateImageUrl = async ({
                 },
                 mosaickingOrder: 'leastCC',
               },
-              // Changed from "SENTINEL2_L2A" to "sentinel-2-l2a"
               type: 'sentinel-2-l2a',
             },
           ],
@@ -228,7 +226,7 @@ const generateImageUrl = async ({
           responses: [
             {
               identifier: 'default',
-              format: { type: 'image/jpeg' },
+              format: { type: 'image/png' },
             },
           ],
         },
@@ -236,18 +234,15 @@ const generateImageUrl = async ({
       {
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'image/jpeg',
+          Accept: 'image/png',
           Authorization: `Bearer ${token}`,
         },
         responseType: 'arraybuffer',
       }
     )
-
-    // Convert binary response to base64 for direct image URL
     const base64 = Buffer.from(response.data).toString('base64')
-    return `data:image/jpeg;base64,${base64}`
+    return `data:image/png;base64,${base64}`
   } catch (error) {
-    // Improved error handling
     if (error.response && error.response.data) {
       try {
         const errorMsg = Buffer.from(error.response.data).toString('utf8')
@@ -259,6 +254,141 @@ const generateImageUrl = async ({
       console.error('Error generating image URL:', error)
     }
     throw error
+  }
+}
+
+const generateThumbnailUrl = async ({
+  imageId,
+  bbox,
+  bandCombination = 'TRUE_COLOR',
+  width = 128,
+  height = 128,
+}) => {
+  try {
+    const token = await getAuthToken()
+    const bands = getBandsForCombination(bandCombination)
+
+    // Fix date extraction
+    let fromDate, toDate
+    const dateMatch =
+      imageId.match(/_MSI[^_]*_(\d{8})T/) ||
+      imageId.match(/^(\d{4}-\d{2}-\d{2})/) ||
+      imageId.match(/S2[AB]_(\d{8})/)
+
+    // Process date match results
+    if (dateMatch && dateMatch[1]) {
+      const dateStr = dateMatch[1]
+      // Format the date correctly based on the pattern matched
+      const formattedDate = dateStr.includes('-')
+        ? dateStr // Already in YYYY-MM-DD format
+        : `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`
+
+      fromDate = formattedDate
+      toDate = formattedDate
+      console.log(
+        `Thumbnail: Extracted date ${formattedDate} from image ID ${imageId}`
+      )
+    } else {
+      // Fallback to a date range if parsing failed
+      toDate = new Date().toISOString().split('T')[0]
+      fromDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0]
+      console.log(
+        `Thumbnail: Falling back to date range ${fromDate} to ${toDate} for image ${imageId}`
+      )
+    }
+
+    // Thumbnail-specific evalscript with contrast enhancement
+    const evalscript = `
+      //VERSION=3
+      function setup() {
+        return {
+          input: ["${bands.join('", "')}"],
+          output: { bands: 3 }
+        };
+      }
+
+      function evaluatePixel(sample) {
+        // Get band values
+        let values = [sample.${bands[0]}, sample.${bands[1]}, sample.${
+      bands[2]
+    }];
+        
+        // Apply thumbnail-specific contrast enhancement
+        for (let i = 0; i < values.length; i++) {
+          values[i] = Math.max(0, Math.min(1, values[i]));
+          // More aggressive contrast for thumbnails
+          values[i] = (values[i] - 0.1) * (1.0 / 0.7);
+          values[i] = Math.max(0, Math.min(1, values[i]));
+        }
+        
+        return values;
+      }
+    `
+
+    const response = await axios.post(
+      'https://services.sentinel-hub.com/api/v1/process',
+      {
+        input: {
+          bounds: {
+            bbox: bbox,
+            properties: {
+              crs: 'http://www.opengis.net/def/crs/EPSG/0/4326',
+            },
+          },
+          data: [
+            {
+              dataFilter: {
+                timeRange: {
+                  from: `${fromDate}T00:00:00Z`,
+                  to: `${toDate}T23:59:59Z`,
+                },
+                mosaickingOrder: 'leastCC',
+              },
+              type: 'sentinel-2-l2a',
+            },
+          ],
+        },
+        evalscript: evalscript,
+        output: {
+          width: width,
+          height: height,
+          responses: [
+            {
+              identifier: 'default',
+              format: { type: 'image/png' }, // Specify PNG
+            },
+          ],
+        },
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'image/png', // Match the requested format
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: 'arraybuffer',
+      }
+    )
+
+    // Convert binary response to base64 for direct image URL
+    const base64 = Buffer.from(response.data).toString('base64')
+    return `data:image/png;base64,${base64}`
+  } catch (error) {
+    console.error('Error generating thumbnail:', error.message)
+    if (error.response) {
+      console.error(`Status: ${error.response.status}`)
+      if (error.response.data) {
+        try {
+          const errorMsg = Buffer.from(error.response.data).toString('utf8')
+          console.error('Error details from Sentinel Hub:', errorMsg)
+        } catch (e) {
+          console.error('Could not parse error response', e)
+        }
+      }
+    }
+    throw new Error(`Failed to generate thumbnail: ${error.message}`)
   }
 }
 
@@ -277,5 +407,6 @@ module.exports = {
   getAvailableImages,
   generateImageUrl,
   getBandsForCombination,
+  generateThumbnailUrl,
   _resetAuthTokenCache,
 }
