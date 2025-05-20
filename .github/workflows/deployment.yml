@@ -26,7 +26,6 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./earth-server
-        # Add --legacy-peer-deps flag here
         run: npm ci --legacy-peer-deps
 
       - name: Run tests
