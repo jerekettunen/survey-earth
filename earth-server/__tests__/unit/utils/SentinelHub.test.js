@@ -110,7 +110,7 @@ describe('SentinelHub API', () => {
         bandCombination: 'TRUE_COLOR',
       })
 
-      expect(imageUrl).toMatch(/^data:image\/jpeg;base64,/)
+      expect(imageUrl).toMatch(/^data:image\/png;base64,/)
     })
   })
 })
