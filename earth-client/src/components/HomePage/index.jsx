@@ -142,7 +142,7 @@ const HomePage = () => {
               How Earth.Project Works
             </h2>
             <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-              From satellite to insights in three simple steps
+              From satellite to insights and beyond in three simple steps
             </p>
           </div>
 
