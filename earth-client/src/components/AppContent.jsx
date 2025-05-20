@@ -11,8 +11,10 @@ import ProjectSingle from '@/components/ProjectSingle'
 import LoginForm from '@/components/auth/LoginForm'
 import SignUpForm from '@/components/auth/SignUpForm'
 import DashSideBar from '@/components/DashSideBar'
+import HomePage from './HomePage'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { ProjectRoleProvider } from '@/components/Providers/ProjectRoleProvider'
+import { Home } from 'lucide-react'
 
 const AppContent = () => {
   const { isAuthenticated, logout } = useAuth()
@@ -37,19 +39,27 @@ const AppContent = () => {
           </>
         ) : (
           // Show only login when not logged in
-          <div className="absolute top-3 right-3 flex gap-2">
+          <div className="absolute top-3 right-3 flex gap-2 z-50">
             <ModeToggle />
-            <Button asChild variant="ghost">
+            <Button
+              asChild
+              variant="ghost"
+              className="bg-blue-900/50 hover:bg-blue-900/70 text-white border border-blue-400/30 backdrop-blur-sm"
+            >
               <Link to="/">Home</Link>
             </Button>
-            <Button asChild variant="ghost">
+            <Button
+              asChild
+              variant="ghost"
+              className="bg-blue-900/50 hover:bg-blue-900/70 text-white border border-blue-400/30 backdrop-blur-sm"
+            >
               <Link to="/login">Login</Link>
             </Button>
           </div>
         )}
-        <div className="flex flex-col items-center w-full max-w-6xl mx-auto px-4 py-2">
+        <div className="flex flex-col items-center w-full mx-auto px-4 py-2">
           <Routes>
-            <Route path="/" element={<div>Home</div>} />
+            <Route path="/" element={<HomePage />} />
 
             <Route
               path="/projects"

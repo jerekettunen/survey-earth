@@ -31,9 +31,9 @@ export const GET_PROJECTS = gql`
     projects {
       id
       name
-      description
-      latitude
-      longitude
+      status
+      type
+      createdAt
     }
   }
 `
