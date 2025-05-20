@@ -1,2 +1,1 @@
-Earth.project
-Update
+Earth.project Server
