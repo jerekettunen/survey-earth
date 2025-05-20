@@ -50,7 +50,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 })
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000',
+  uri: 'http://localhost:4000/graphql',
 })
 
 const wsLink = new GraphQLWsLink(createClient({ url: 'ws://localhost:4000' }))

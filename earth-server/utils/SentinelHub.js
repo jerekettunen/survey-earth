@@ -1,21 +1,19 @@
-const {
-  SentinelHubRequest,
-  CRS_EPSG4326,
-  MimeTypes,
-  BBox,
-  DataCollection,
-} = require('@sentinel-hub/sentinelhub-js')
+/* eslint-disable @stylistic/js/indent */
 const axios = require('axios')
 require('dotenv').config()
 
 // SentinelHub OAuth credentials
 const clientId = process.env.SENTINEL_HUB_CLIENT_ID
 const clientSecret = process.env.SENTINEL_HUB_CLIENT_SECRET
-const instanceId = process.env.SENTINEL_HUB_INSTANCE_ID
 
 // Cache for auth tokens
 let authToken = null
 let tokenExpiry = null
+
+const _resetAuthTokenCache = () => {
+  authToken = null
+  tokenExpiry = null
+}
 
 /**
  * Get authentication token from SentinelHub
@@ -65,46 +63,60 @@ const getAvailableImages = async ({
   fromDate,
   toDate,
   maxCloudCoverage = 30,
+  bandCombination = 'TRUE_COLOR',
 }) => {
   try {
     const token = await getAuthToken()
+
+    // Ensure dates are in ISO format YYYY-MM-DDT00:00:00Z
+    const formatDate = (date) => {
+      if (date instanceof Date) {
+        return date.toISOString()
+      }
+      // If already a string, ensure it's properly formatted
+      return new Date(date).toISOString()
+    }
+
+    const isoFromDate = formatDate(fromDate)
+    const isoToDate = formatDate(toDate)
+
+    console.log(`Using date range: ${isoFromDate} to ${isoToDate}`)
 
     // Catalog API call to get available images
     const response = await axios.post(
       'https://services.sentinel-hub.com/api/v1/catalog/search',
       {
         bbox: bbox,
-        timeRange: {
-          from: fromDate,
-          to: toDate,
-        },
+        datetime: `${isoFromDate}/${isoToDate}`,
         collections: ['sentinel-2-l2a'],
-        maxCloudCoverage: maxCloudCoverage,
+        query: {
+          'eo:cloud_cover': {
+            lt: maxCloudCoverage,
+          },
+        },
         limit: 15, // Limit number of results
       },
       {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
       }
     )
 
-    // Transform the response into a more usable format
     return response.data.features.map((feature) => ({
       id: feature.id,
       date: feature.properties.datetime,
-      cloudCoverage: feature.properties.cloudCoverPercentage,
+      cloudCoverage: feature.properties['eo:cloud_cover'],
       source: 'sentinel-2-l2a',
-      bands: ['B02', 'B03', 'B04', 'B08'], // Default bands
-      // We'll generate these URLs when needed
-      url: null,
-      thumbnail: null,
-      // Additional metadata
-      metadata: feature.properties,
+      bandCombination: bandCombination,
     }))
   } catch (error) {
     console.error('Error fetching available images:', error)
+    if (error.response && error.response.data) {
+      console.error('Error details:', error.response.data)
+    }
     throw error
   }
 }
@@ -114,71 +126,149 @@ const getAvailableImages = async ({
  * @param {Object} params - Image parameters
  * @returns {Promise<string>} - URL to the image
  */
+
 const generateImageUrl = async ({
   imageId,
   bbox,
-  bands = ['B04', 'B03', 'B02'],
+  bandCombination = 'TRUE_COLOR',
   width = 512,
   height = 512,
 }) => {
   try {
     const token = await getAuthToken()
+    const bands = getBandsForCombination(bandCombination)
 
-    const request = new SentinelHubRequest({
-      evalscript: `
-        //VERSION=3
-        function setup() {
-          return {
-            input: ["${bands.join('", "')}"],
-            output: { bands: 3 }
-          };
-        }
+    // Extract date from the imageId using proper Sentinel-2 ID format parsing
+    let fromDate, toDate
 
-        function evaluatePixel(sample) {
-          return [sample.${bands[0]}, sample.${bands[1]}, sample.${bands[2]}];
-        }
-      `,
-      input: {
-        bounds: {
-          bbox: bbox,
-          properties: {
-            crs: CRS_EPSG4326,
-          },
-        },
-        data: [
-          {
-            dataFilter: {
-              timeRange: {
-                from: imageId.split('_')[0],
-                to: imageId.split('_')[0],
-              },
-              mosaickingOrder: 'leastCC',
+    // The format is typically: S2C_MSIL2A_20250516T095041_N0511_R079_T35VLG_20250516T122757
+    if (imageId.includes('_MSIL2A_')) {
+      // Extract the date portion (YYYYMMDD) and convert to ISO format YYYY-MM-DD
+      const dateMatch = imageId.match(/_MSIL2A_(\d{8})T/)
+      if (dateMatch && dateMatch[1]) {
+        const dateStr = dateMatch[1]
+        const formattedDate = `${dateStr.slice(0, 4)}-${dateStr.slice(
+          4,
+          6
+        )}-${dateStr.slice(6, 8)}`
+        fromDate = formattedDate
+        toDate = formattedDate
+        console.log(`Extracted date ${formattedDate} from image ID ${imageId}`)
+      } else {
+        // Fallback to a date range if parsing failed
+        toDate = new Date().toISOString().split('T')[0]
+        fromDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0]
+        console.log(
+          `Falling back to date range ${fromDate} to ${toDate} for image ${imageId}`
+        )
+      }
+    } else {
+      // Direct date or catalog ID handling
+      fromDate = imageId
+      toDate = imageId
+
+      // If it appears to be a catalog ID and not a date, use a fallback date range
+      if (!fromDate.match(/^\d{4}-\d{2}-\d{2}/)) {
+        // Use last 30 days as fallback
+        toDate = new Date().toISOString().split('T')[0]
+        fromDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0]
+        console.log(
+          `Falling back to date range ${fromDate} to ${toDate} for image ${imageId}`
+        )
+      }
+    }
+
+    const evalscript = `
+      //VERSION=3
+      function setup() {
+        return {
+          input: ["${bands.join('", "')}"],
+          output: { bands: 3 }
+        };
+      }
+
+      function evaluatePixel(sample) {
+        return [sample.${bands[0]}, sample.${bands[1]}, sample.${bands[2]}];
+      }
+    `
+
+    // Use direct API call with axios
+    const response = await axios.post(
+      'https://services.sentinel-hub.com/api/v1/process',
+      {
+        input: {
+          bounds: {
+            bbox: bbox,
+            properties: {
+              crs: 'http://www.opengis.net/def/crs/EPSG/0/4326',
             },
-            type: DataCollection.SENTINEL2_L2A,
           },
-        ],
+          data: [
+            {
+              dataFilter: {
+                timeRange: {
+                  from: `${fromDate}T00:00:00Z`,
+                  to: `${toDate}T23:59:59Z`,
+                },
+                mosaickingOrder: 'leastCC',
+              },
+              // Changed from "SENTINEL2_L2A" to "sentinel-2-l2a"
+              type: 'sentinel-2-l2a',
+            },
+          ],
+        },
+        evalscript: evalscript,
+        output: {
+          width: width,
+          height: height,
+          responses: [
+            {
+              identifier: 'default',
+              format: { type: 'image/jpeg' },
+            },
+          ],
+        },
       },
-      output: {
-        width: width,
-        height: height,
-        responses: [
-          {
-            identifier: 'default',
-            format: { type: MimeTypes.JPEG },
-          },
-        ],
-      },
-    })
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'image/jpeg',
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: 'arraybuffer',
+      }
+    )
 
-    const url = await request.getUrl({
-      authToken: token,
-      OrgId: instanceId,
-    })
-
-    return url
+    // Convert binary response to base64 for direct image URL
+    const base64 = Buffer.from(response.data).toString('base64')
+    return `data:image/jpeg;base64,${base64}`
   } catch (error) {
-    console.error('Error generating image URL:', error)
+    // Improved error handling
+    if (error.response && error.response.data) {
+      try {
+        const errorMsg = Buffer.from(error.response.data).toString('utf8')
+        console.error('Error from Sentinel Hub:', errorMsg)
+      } catch (e) {
+        console.error('Error generating image URL:', e)
+      }
+    } else {
+      console.error('Error generating image URL:', error)
+    }
     throw error
+  }
+}
+
+const getBandsForCombination = (bandCombination) => {
+  switch (bandCombination) {
+    case 'FALSE_COLOR':
+      return ['B08', 'B04', 'B03']
+    case 'TRUE_COLOR':
+    default:
+      return ['B04', 'B03', 'B02'] // Default to true color
   }
 }
 
@@ -186,4 +276,6 @@ module.exports = {
   getAuthToken,
   getAvailableImages,
   generateImageUrl,
+  getBandsForCombination,
+  _resetAuthTokenCache,
 }

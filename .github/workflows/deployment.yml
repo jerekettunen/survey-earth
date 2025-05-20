@@ -1,0 +1,127 @@
+name: Deploy Earth Survey
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'earth-server/**'
+      - 'earth-client/**'
+      - '.github/workflows/**'
+
+jobs:
+  test-backend:
+    name: Test Backend
+    if: contains(github.event.head_commit.modified, 'earth-server/') || contains(github.event.head_commit.added, 'earth-server/') || contains(github.event.head_commit.removed, 'earth-server/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: earth-server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./earth-server
+        # Add --legacy-peer-deps flag here
+        run: npm ci --legacy-peer-deps
+
+      - name: Run tests
+        working-directory: ./earth-server
+        run: npm test
+        env:
+          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+  deploy-backend:
+    name: Deploy Backend
+    needs: test-backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        working-directory: ./earth-server
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+
+      - name: Deploy backend
+        working-directory: ./earth-server
+        run: serverless deploy --stage prod
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          SENTINEL_HUB_CLIENT_ID: ${{ secrets.SENTINEL_HUB_CLIENT_ID }}
+          SENTINEL_HUB_CLIENT_SECRET: ${{ secrets.SENTINEL_HUB_CLIENT_SECRET }}
+          SENTINEL_HUB_INSTANCE_ID: ${{ secrets.SENTINEL_HUB_INSTANCE_ID }}
+
+  test-frontend:
+    name: Test Frontend
+    if: contains(github.event.head_commit.modified, 'earth-client/') || contains(github.event.head_commit.added, 'earth-client/') || contains(github.event.head_commit.removed, 'earth-client/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: earth-client/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./earth-client
+        run: npm ci --legacy-peer-deps
+
+      - name: Run tests
+        working-directory: ./earth-client
+        run: npm test
+
+  deploy-frontend:
+    name: Deploy Frontend
+    needs: test-frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        working-directory: ./earth-client
+        run: npm ci --legacy-peer-deps
+
+      - name: Build
+        working-directory: ./earth-client
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.API_URL }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Deploy to S3
+        working-directory: ./earth-client
+        run: aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} --delete

@@ -1,6 +1,11 @@
 const typeDefs = `
 scalar DateTime
 
+enum BandCombination {
+  TRUE_COLOR    # RGB (B04, B03, B02)
+  FALSE_COLOR   # NIR, Red, Green (B08, B04, B03)
+}
+
 type Project {
     id: ID!
     name: String!
@@ -34,9 +39,41 @@ type Token {
   value: String!
 }
 
+type SatelliteImage {
+  id: ID!
+  date: DateTime!
+  url: String
+  thumbnail: String
+  cloudCoverage: Float
+  source: String!
+  bandCombination: BandCombination!
+  projectId: ID!
+}
+
+extend type Project {
+  satelliteImages(from: DateTime, to: DateTime, maxCloudCoverage: Float): [SatelliteImage!]!
+  latestSatelliteImage(bandCombination: BandCombination = TRUE_COLOR): SatelliteImage
+}
+
 type Query {
   projects: [Project!]!
   project(id: ID!): Project 
+}
+
+extend type Query {
+  getAvailableImagesForProject(
+    projectId: ID!, 
+    from: DateTime, 
+    to: DateTime, 
+    maxCloudCoverage: Float = 30
+  ): [SatelliteImage!]!
+  
+  getSatelliteImage(
+    imageId: ID!, 
+    projectId: ID!, 
+    bandCombination: BandCombination = TRUE_COLOR, 
+    customBands: [String!]
+  ): SatelliteImage
 }
 
 type Mutation {

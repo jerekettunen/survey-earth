@@ -1,117 +1,25 @@
-const { ApolloServer } = require('@apollo/server')
-const {
-  ApolloServerPluginDrainHttpServer,
-} = require('@apollo/server/plugin/drainHttpServer')
-const { expressMiddleware } = require('@apollo/server/express4')
-const { makeExecutableSchema } = require('@graphql-tools/schema')
-
-const { WebSocketServer } = require('ws')
-const { useServer } = require('graphql-ws/lib/use/ws')
-
-const http = require('http')
-const express = require('express')
-const cors = require('cors')
-
-const mongoose = require('mongoose')
-mongoose.set('strictQuery', false)
-
-const jwt = require('jsonwebtoken')
-
-const User = require('./models/user')
-
 require('dotenv').config()
+const { createServer } = require('./server')
 
-const typeDefs = require('./schema')
-const resolvers = require('./resolvers')
-
-const MONGODB_URI = process.env.MONGODB_URI
-
-console.log('connecting to', MONGODB_URI)
-
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log('connected to MongoDB')
-  })
-  .catch((error) => {
-    console.log('error connection to MongoDB:', error.message)
-  })
-
-// setup is now within a function
-const start = async () => {
-  const app = express()
-  const httpServer = http.createServer(app)
-
-  const wsServer = new WebSocketServer({
-    server: httpServer,
-    path: '/',
-  })
-
-  const schema = makeExecutableSchema({ typeDefs, resolvers })
-  const serverCleanup = useServer({ schema }, wsServer)
-
-  const server = new ApolloServer({
-    schema,
-    plugins: [
-      ApolloServerPluginDrainHttpServer({ httpServer }),
-      {
-        async serverWillStart() {
-          return {
-            async drainServer() {
-              await serverCleanup.dispose()
-            },
-          }
-        },
-      },
-    ],
-  })
-
-  await server.start()
-
-  app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`)
-    next()
-  })
-
-  app.use(
-    '/',
-    cors({
-      origin: 'http://localhost:5173',
-      credentials: true,
-    }),
-    express.json(),
-    expressMiddleware(server, {
-      context: async ({ req }) => {
-        try {
-          const auth = req ? req.headers.authorization : null
-          if (auth && auth.startsWith('Bearer ')) {
-            try {
-              const decodedToken = jwt.verify(
-                auth.substring(7),
-                process.env.JWT_SECRET
-              )
-              const currentUser = await User.findById(decodedToken.id)
-              return { currentUser }
-            } catch (tokenError) {
-              console.error('Token verification failed:', tokenError.message)
-              // Return context without user rather than failing
-              return {}
-            }
-          }
-          return {}
-        } catch (error) {
-          console.error('Context creation error:', error)
-          return {} // Return empty context rather than failing
-        }
-      },
+// Start the server
+const startServer = async () => {
+  try {
+    // We'll handle MongoDB connection in server.js for Lambda compatibility
+    const { app } = await createServer()
+    const PORT = process.env.PORT || 4000
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`)
     })
-  )
-
-  const PORT = 4000
-
-  httpServer.listen(PORT, () =>
-    console.log(`Server is now running on http://localhost:${PORT}`)
-  )
+  } catch (error) {
+    console.error('Error starting server:', error)
+    process.exit(1)
+  }
 }
 
-start()
+// Start the server if this file is run directly
+if (require.main === module) {
+  startServer()
+}
+
+// Export the createServer function for testing
+module.exports = { createServer }

@@ -5,6 +5,8 @@ import MapDialog from './MapDialog'
 import ProjectEditDialog from './ProjectEditDialog'
 import CollabDialogue from '../CollabDialogue'
 import DeleteAlert from './DeleteAlert'
+import SatelliteTab from './SatelliteTab'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,6 +19,8 @@ import {
   Users,
   Shield,
   Delete,
+  Satellite,
+  Activity,
 } from 'lucide-react'
 import { formatDate } from '@/utils/helper'
 import { useProjectRole } from '../Providers/ProjectRoleProvider'
@@ -135,95 +139,141 @@ const ProjectSingle = ({ id }) => {
 
         <div className="flex gap-2">
           {can.edit && <ProjectEditDialog project={project} />}
-
           {can.manage && <CollabDialogue project={project} />}
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText size={18} />
-              Project Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="prose dark:prose-invert">
-              <p>{project.description || 'No description provided'}</p>
-            </div>
+      <Tabs defaultValue="details" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="details" className="flex items-center gap-1">
+            <FileText size={16} />
+            Details
+          </TabsTrigger>
+          <TabsTrigger value="satellite" className="flex items-center gap-1">
+            <Satellite size={16} />
+            Satellite
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-1">
+            <Activity size={16} />
+            Analytics
+          </TabsTrigger>
+        </TabsList>
 
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar size={16} />
-                <span>Started: {formattedStartDate}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar size={16} />
-                <span>Ends: {formattedEndDate}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock size={16} />
-                <span>Created: {formattedCreatedAt}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users size={16} />
-                <span>Collaborators: {project.collaborators?.length || 0}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <TabsContent value="details" className="pt-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText size={18} />
+                  Project Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="prose dark:prose-invert">
+                  <p>{project.description || 'No description provided'}</p>
+                </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin size={18} />
-              Location
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md overflow-hidden border h-[250px]">
-              <MapDialog
-                marker={{
-                  latitude: project.latitude,
-                  longitude: project.longitude,
-                }}
-                projectName={project.name}
-              />
-            </div>
-            <div className="flex justify-between mt-4 text-sm">
-              <div>
-                Latitude:{' '}
-                <span className="font-mono">{project.latitude.toFixed(6)}</span>
-              </div>
-              <div>
-                Longitude:{' '}
-                <span className="font-mono">
-                  {project.longitude.toFixed(6)}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar size={16} />
+                    <span>Started: {formattedStartDate}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar size={16} />
+                    <span>Ends: {formattedEndDate}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock size={16} />
+                    <span>Created: {formattedCreatedAt}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Users size={16} />
+                    <span>
+                      Collaborators: {project.collaborators?.length || 0}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-      {can.delete && (
-        <div className="border-t pt-6 mt-6">
-          <h2 className="text-lg font-semibold mb-4">Danger Zone</h2>
-          <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-md p-4">
-            <h3 className="font-medium text-red-800 dark:text-red-400">
-              Delete Project
-            </h3>
-            <p className="text-sm text-red-700 dark:text-red-300 mb-4">
-              This action is permanent and cannot be undone.
-            </p>
-            <DeleteAlert
-              deleteProject={deleteProject}
-              projectName={project.name}
-            />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin size={18} />
+                  Location
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md overflow-hidden border h-[250px]">
+                  <MapDialog
+                    marker={{
+                      latitude: project.latitude,
+                      longitude: project.longitude,
+                    }}
+                    projectName={project.name}
+                  />
+                </div>
+                <div className="flex justify-between mt-4 text-sm">
+                  <div>
+                    Latitude:{' '}
+                    <span className="font-mono">
+                      {project.latitude.toFixed(6)}
+                    </span>
+                  </div>
+                  <div>
+                    Longitude:{' '}
+                    <span className="font-mono">
+                      {project.longitude.toFixed(6)}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-      )}
+
+          {can.delete && (
+            <div className="border-t pt-6 mt-6">
+              <h2 className="text-lg font-semibold mb-4">Danger Zone</h2>
+              <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-md p-4">
+                <h3 className="font-medium text-red-800 dark:text-red-400">
+                  Delete Project
+                </h3>
+                <p className="text-sm text-red-700 dark:text-red-300 mb-4">
+                  This action is permanent and cannot be undone.
+                </p>
+                <DeleteAlert
+                  deleteProject={deleteProject}
+                  projectName={project.name}
+                />
+              </div>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="satellite" className="pt-6">
+          <SatelliteTab projectId={id} />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="pt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity size={18} />
+                Project Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="p-6 text-center text-muted-foreground">
+                <p>Analytics features coming soon...</p>
+                <p className="text-sm mt-2">
+                  Project data visualization and insights will be available in a
+                  future update.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

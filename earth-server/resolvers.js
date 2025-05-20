@@ -1,4 +1,10 @@
 const { GraphQLError, GraphQLScalarType, Kind } = require('graphql')
+const { getAvailableImages, generateImageUrl } = require('./utils/SentinelHub')
+const {
+  convertGeoJSONToBBox,
+  createBBoxFromLatLong,
+} = require('./utils/geoUtils')
+
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const Project = require('./models/project')
@@ -36,7 +42,7 @@ const baseResolvers = {
           { owner: context.currentUser._id },
           { 'collaborators.user': context.currentUser._id },
         ],
-      })
+      }).sort({ createdAt: -1 })
       return projects.map((project) => project.toJSON())
     },
 
@@ -58,6 +64,100 @@ const baseResolvers = {
       }
 
       return project.toJSON()
+    },
+    getAvailableImagesForProject: async (root, args) => {
+      const { projectId, from, to, maxCloudCoverage = 30 } = args
+
+      // Get project
+      const project = await Project.findById(projectId)
+      if (!project) {
+        throw new GraphQLError('Project not found', {
+          extensions: { code: 'NOT_FOUND' },
+        })
+      }
+
+      // Get bounding box (either from project boundary or lat/long)
+      let bbox
+      if (project.boundary) {
+        bbox = convertGeoJSONToBBox(project.boundary)
+      } else {
+        bbox = createBBoxFromLatLong(project.latitude, project.longitude)
+      }
+
+      try {
+        const images = await getAvailableImages({
+          bbox,
+          fromDate: from,
+          toDate: to,
+          maxCloudCoverage,
+          bandCombination: 'TRUE_COLOR',
+        })
+
+        return images.map((img) => ({
+          ...img,
+          projectId,
+        }))
+      } catch (error) {
+        console.error(
+          `Error fetching satellite images for project ${projectId}:`,
+          error
+        )
+        throw new GraphQLError('Failed to fetch satellite images', {
+          extensions: { code: 'API_ERROR' },
+        })
+      }
+    },
+    getSatelliteImage: async (root, args) => {
+      const { imageId, projectId, bandCombination = 'TRUE_COLOR' } = args
+
+      // Get project
+      const project = await Project.findById(projectId)
+      if (!project) {
+        throw new GraphQLError('Project not found', {
+          extensions: { code: 'NOT_FOUND' },
+        })
+      }
+
+      // Get bounding box
+      let bbox
+      if (project.boundary) {
+        bbox = convertGeoJSONToBBox(project.boundary)
+      } else {
+        bbox = createBBoxFromLatLong(project.latitude, project.longitude)
+      }
+
+      try {
+        // Generate image URL with the requested band combination
+        const url = await generateImageUrl({
+          imageId,
+          bbox,
+          bandCombination,
+        })
+
+        // Generate thumbnail
+        const thumbnail = await generateImageUrl({
+          imageId,
+          bbox,
+          bandCombination,
+          width: 128,
+          height: 128,
+        })
+
+        return {
+          id: imageId,
+          date: imageId.split('_')[0], // Extract date from ID
+          url,
+          thumbnail,
+          source: 'sentinel-2-l2a',
+          bandCombination,
+          projectId,
+        }
+      } catch (error) {
+        console.error('Error generating satellite image URL:', error)
+        throw new GraphQLError('Failed to generate satellite image', {
+          extensions: { code: 'API_ERROR' },
+        })
+      }
     },
   },
 
@@ -184,26 +284,34 @@ const baseResolvers = {
     login: async (root, args) => {
       console.log('Login attempt with username:', args.username)
       const user = await User.findOne({ username: args.username })
-      const passwordCorrect =
-        user === null
-          ? false
-          : await bcrypt.compare(args.password, user.password)
-
-      if (!(user && passwordCorrect)) {
-        console.log('Wrong credentials')
+      if (!user) {
+        console.log('User not found:', args.username)
         throw new GraphQLError('Wrong credentials', {
           extensions: { code: 'BAD_USER_INPUT' },
         })
       }
 
-      console.log('User found:', user)
+      const passwordCorrect = await bcrypt.compare(args.password, user.password)
+      if (!passwordCorrect) {
+        console.log('Password incorrect for user:', args.username)
+        throw new GraphQLError('Wrong credentials', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        })
+      }
+
+      console.log('Password correct, generating token')
       const userForToken = {
         username: user.username,
         id: user._id.toString(),
       }
-      const token = jwt.sign(userForToken, process.env.JWT_SECRET, {
-        expiresIn: 60 * 60,
-      })
+      const token = jwt.sign(
+        userForToken,
+        process.env.JWT_SECRET || 'test-secret',
+        {
+          expiresIn: 60 * 60,
+        }
+      )
+      console.log('Token generated successfully')
       return { value: token }
     },
   },
@@ -214,6 +322,10 @@ const resolvers = {
   Query: {
     projects: requireAuth(baseResolvers.Query.projects),
     project: requireAuth(baseResolvers.Query.project),
+    getAvailableImagesForProject: requireAuth(
+      baseResolvers.Query.getAvailableImagesForProject
+    ),
+    getSatelliteImage: requireAuth(baseResolvers.Query.getSatelliteImage),
   },
 
   Mutation: {
@@ -368,6 +480,107 @@ const customResolvers = {
       // Remove any nulls that might have been returned due to errors
       const resolvedCollaborators = await Promise.all(collaboratorPromises)
       return resolvedCollaborators.filter(Boolean)
+    },
+    satelliteImages: async (project, { from, to, maxCloudCoverage = 30 }) => {
+      // Default to last 3 months if dates not specified
+      const toDate = to || new Date().toISOString()
+      const fromDate =
+        from || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+
+      // Get bounding box
+      let bbox
+      if (project.boundary) {
+        bbox = convertGeoJSONToBBox(project.boundary)
+      } else {
+        bbox = createBBoxFromLatLong(project.latitude, project.longitude)
+      }
+
+      try {
+        const images = await getAvailableImages({
+          bbox,
+          fromDate,
+          toDate,
+          maxCloudCoverage,
+        })
+
+        return images.map((img) => ({
+          ...img,
+          projectId: project._id.toString(),
+        }))
+      } catch (error) {
+        console.error(
+          `Error fetching satellite images for project ${project._id}:`,
+          error
+        )
+        // Return empty array instead of throwing to avoid breaking the entire project query
+        return []
+      }
+    },
+    latestSatelliteImage: async (
+      project,
+      { bandCombination = 'TRUE_COLOR' }
+    ) => {
+      // Get bbox
+      let bbox
+      if (project.boundary) {
+        bbox = convertGeoJSONToBBox(project.boundary)
+      } else {
+        bbox = createBBoxFromLatLong(project.latitude, project.longitude)
+      }
+
+      // Get last 30 days of images
+      const toDate = new Date().toISOString()
+      const fromDate = new Date(
+        Date.now() - 30 * 24 * 60 * 60 * 1000
+      ).toISOString()
+
+      try {
+        const images = await getAvailableImages({
+          bbox,
+          fromDate,
+          toDate,
+          maxCloudCoverage: 30,
+        })
+
+        if (images.length === 0) {
+          return null
+        }
+
+        // Sort by date (newest first) and get first
+        const latestImage = images.sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
+        )[0]
+
+        // Generate URL with the requested band combination
+        const url = await generateImageUrl({
+          imageId: latestImage.id,
+          bbox,
+          bandCombination,
+        })
+
+        // Generate thumbnail
+        const thumbnail = await generateImageUrl({
+          imageId: latestImage.id,
+          bbox,
+          bandCombination,
+          width: 128,
+          height: 128,
+        })
+
+        return {
+          ...latestImage,
+          url,
+          thumbnail,
+          bandCombination,
+          projectId: project._id.toString(),
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching latest satellite image for project ${project._id}:`,
+          error
+        )
+        return null
+      }
     },
   },
 

@@ -1,0 +1,37 @@
+service: earth-survey-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${opt:region, 'eu-north-1'}
+  stage: ${opt:stage, 'dev'}
+  memorySize: 1024
+  timeout: 30
+  environment:
+    MONGODB_URI: ${env:MONGODB_URI}
+    JWT_SECRET: ${env:JWT_SECRET}
+    NODE_ENV: production
+    FRONTEND_URL: ${env:FRONTEND_URL}
+    SENTINEL_HUB_CLIENT_ID: ${env:SENTINEL_HUB_CLIENT_ID}
+    SENTINEL_HUB_CLIENT_SECRET: ${env:SENTINEL_HUB_CLIENT_SECRET}
+    SENTINEL_HUB_INSTANCE_ID: ${env:SENTINEL_HUB_INSTANCE_ID}
+
+functions:
+  api:
+    handler: lambda.handler
+    events:
+      - httpApi: '*' # API Gateway v2 (HTTP API) - more cost effective
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+
+package:
+  patterns:
+    - '!node_modules/aws-sdk/**'
+    - '!**/*.md'
+    - '!**/*.txt'
+    - '!.env*'

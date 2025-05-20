@@ -179,3 +179,61 @@ export const UPDATE_COLLABORATOR_ROLE = gql`
     }
   }
 `
+export const GET_AVAILABLE_IMAGES = gql`
+  query GetAvailableImages(
+    $projectId: ID!
+    $from: DateTime
+    $to: DateTime
+    $maxCloudCoverage: Float
+  ) {
+    getAvailableImagesForProject(
+      projectId: $projectId
+      from: $from
+      to: $to
+      maxCloudCoverage: $maxCloudCoverage
+    ) {
+      id
+      date
+      thumbnail
+      cloudCoverage
+      source
+      bandCombination
+    }
+  }
+`
+
+export const GET_SATELLITE_IMAGE = gql`
+  query GetSatelliteImage(
+    $imageId: ID!
+    $projectId: ID!
+    $bandCombination: BandCombination
+  ) {
+    getSatelliteImage(
+      imageId: $imageId
+      projectId: $projectId
+      bandCombination: $bandCombination
+    ) {
+      id
+      date
+      url
+      cloudCoverage
+      source
+      bandCombination
+    }
+  }
+`
+
+export const GET_LATEST_SATELLITE_IMAGE = gql`
+  query GetLatestImage($projectId: ID!, $bandCombination: BandCombination) {
+    project(id: $projectId) {
+      latestSatelliteImage(bandCombination: $bandCombination) {
+        id
+        date
+        url
+        cloudCoverage
+        source
+        bandCombination
+      }
+    }
+  }
+`
