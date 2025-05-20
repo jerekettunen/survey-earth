@@ -73,7 +73,9 @@ jobs:
         run: npm install -g serverless
       - name: Deploy backend
         working-directory: ./earth-server
-        run: serverless deploy --stage prod
+        run: |
+          serverless login --provider-bypass --no-browser
+          serverless deploy --stage prod
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -83,6 +85,7 @@ jobs:
           SENTINEL_HUB_CLIENT_ID: ${{ secrets.SENTINEL_HUB_CLIENT_ID }}
           SENTINEL_HUB_CLIENT_SECRET: ${{ secrets.SENTINEL_HUB_CLIENT_SECRET }}
           SENTINEL_HUB_INSTANCE_ID: ${{ secrets.SENTINEL_HUB_INSTANCE_ID }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
 
   # Test and deploy frontend only if frontend files changed
   test-frontend:
@@ -126,7 +129,7 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.API_URL }}
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
