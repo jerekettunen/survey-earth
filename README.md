@@ -1,7 +1,5 @@
 # Earth.Project - Satellite Monitoring Platform
 
-<img alt="Earth.Project Logo" src="https://example.com/logo.png">
-
 A web application for monitoring Earth's surface through satellite imagery. This platform enables researchers, environmental analysts, and organizations to track changes in specific locations over time using satellite data.
 
 ## Overview
