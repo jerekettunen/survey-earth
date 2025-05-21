@@ -12,10 +12,7 @@ const PROJECT_FIELDS = gql`
     startDate
     endDate
     createdAt
-    owner {
-      id
-      username
-    }
+    owner
     collaborators {
       user {
         id
@@ -33,6 +30,10 @@ export const GET_PROJECTS = gql`
       name
       status
       type
+      owner {
+        id
+        username
+      }
       createdAt
     }
   }

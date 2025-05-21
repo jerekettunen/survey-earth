@@ -98,9 +98,6 @@ const baseResolvers = {
         })
 
         const maxImagesToProcess = Math.min(images.length, 20)
-        console.log(
-          `Generating thumbnails for ${maxImagesToProcess} out of ${images.length} images`
-        )
 
         // Process images with thumbnails
         const processedImages = await Promise.all(
@@ -111,8 +108,8 @@ const baseResolvers = {
                 imageId: img.id,
                 bbox,
                 bandCombination: 'TRUE_COLOR',
-                width: 128,
-                height: 128,
+                width: 96,
+                height: 96,
               })
               return {
                 ...img,
@@ -184,10 +181,9 @@ const baseResolvers = {
           imageId,
           bbox,
           bandCombination,
-          width: 128,
-          height: 128,
+          width: 96,
+          height: 96,
         })
-        console.log(`Successfully generated image and thumbnail for ${imageId}`)
 
         return {
           id: imageId,
@@ -404,10 +400,6 @@ const customResolvers = {
     id: (project) => project?._id?.toString() || null,
     owner: async (project) => {
       // Add detailed logging
-      console.log('Resolving project owner:', {
-        projectId: project?._id?.toString(),
-        ownerRef: project?.owner,
-      })
 
       // If owner is just an ID reference (not populated)
       if (!project || !project.owner) {

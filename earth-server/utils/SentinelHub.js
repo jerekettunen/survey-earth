@@ -261,8 +261,8 @@ const generateThumbnailUrl = async ({
   imageId,
   bbox,
   bandCombination = 'TRUE_COLOR',
-  width = 128,
-  height = 128,
+  width = 96,
+  height = 96,
 }) => {
   try {
     const token = await getAuthToken()
@@ -357,7 +357,7 @@ const generateThumbnailUrl = async ({
           responses: [
             {
               identifier: 'default',
-              format: { type: 'image/png' }, // Specify PNG
+              format: { type: 'image/jpeg', quality: 70 },
             },
           ],
         },
@@ -365,7 +365,7 @@ const generateThumbnailUrl = async ({
       {
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'image/png', // Match the requested format
+          Accept: 'image/jpeg', // Match the requested format
           Authorization: `Bearer ${token}`,
         },
         responseType: 'arraybuffer',
@@ -374,7 +374,7 @@ const generateThumbnailUrl = async ({
 
     // Convert binary response to base64 for direct image URL
     const base64 = Buffer.from(response.data).toString('base64')
-    return `data:image/png;base64,${base64}`
+    return `data:image/jpeg;base64,${base64}`
   } catch (error) {
     console.error('Error generating thumbnail:', error.message)
     if (error.response) {

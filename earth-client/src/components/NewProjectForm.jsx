@@ -13,6 +13,14 @@ import FormDropdown from './formComponents/FormDropdown'
 
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
+import { MapPin, Calendar, FileText, Tag } from 'lucide-react'
 
 const NewProjectForm = () => {
   const [latitude, setLatitude] = useState(0)
@@ -45,7 +53,6 @@ const NewProjectForm = () => {
   }, [location])
 
   const onSubmit = (data) => {
-    console.log('Form submitted:', data)
     const projectData = {
       name: data.name,
       description: data.description,
@@ -64,56 +71,112 @@ const NewProjectForm = () => {
   }
 
   return (
-    <div className="project-form">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormInput
-            form={form}
-            name="name"
-            label="Project Name"
-            placeholder="Enter project name"
-            type="text"
-          />
-          <FormTextField
-            form={form}
-            name="description"
-            label="Description"
-            placeholder="Enter project description"
-          />
-          <div className="flex items-center justify-center space-x-4">
-            <FormDatePick form={form} name="startDate" label="Start Date" />
-            <FormDatePick form={form} name="endDate" label="End Date" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card className="p-2">
+        <CardHeader>
+          <CardTitle>Create New Project</CardTitle>
+          <CardDescription>
+            Fill out the form below to create a new Earth monitoring project.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-primary">
+                  <FileText size={18} />
+                  <h3 className="text-lg font-medium">Project Details</h3>
+                </div>
+
+                <FormInput
+                  form={form}
+                  name="name"
+                  label="Project Name"
+                  placeholder="Enter project name"
+                  type="text"
+                />
+
+                <FormTextField
+                  form={form}
+                  name="description"
+                  label="Description"
+                  placeholder="Enter project description"
+                />
+
+                <FormDropdown
+                  form={form}
+                  name="type"
+                  label="Project Type"
+                  options={projectTypes}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-primary">
+                  <Calendar size={18} />
+                  <h3 className="text-lg font-medium">Timeline</h3>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormDatePick
+                    form={form}
+                    name="startDate"
+                    label="Start Date"
+                  />
+                  <FormDatePick form={form} name="endDate" label="End Date" />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-primary">
+                  <MapPin size={18} />
+                  <h3 className="text-lg font-medium">Location</h3>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInputChange
+                    form={form}
+                    name="Latitude"
+                    label="Latitude"
+                    placeholder="Latitude"
+                    number={latitude}
+                    setter={setLatitude}
+                  />
+                  <FormInputChange
+                    form={form}
+                    name="Longitude"
+                    label="Longitude"
+                    placeholder="Longitude"
+                    number={longitude}
+                    setter={setLongitude}
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full">
+                Create Project
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-0">
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Select Location
+          </CardTitle>
+          <CardDescription>
+            Click on the map to set your project's location
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 pt-4">
+          <div className="h-[500px] rounded-md overflow-hidden">
+            <MapView setLocation={setLocation} location={location} />
           </div>
-          <FormDropdown
-            form={form}
-            name="type"
-            label="Project Type"
-            options={projectTypes}
-          />
-          <div className="flex items-center justify-center space-x-4">
-            <FormInputChange
-              form={form}
-              name="Latitude"
-              label="Latitude"
-              placeholder="Latitude"
-              number={latitude}
-              setter={setLatitude}
-            />
-            <FormInputChange
-              form={form}
-              name="Longitude"
-              label="Longitude"
-              placeholder="Longitude"
-              number={longitude}
-              setter={setLongitude}
-            />
-          </div>
-          <Button type="submit">Create Project</Button>
-        </form>
-      </Form>
-      <div>
-        <MapView setLocation={setLocation} location={location} />
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

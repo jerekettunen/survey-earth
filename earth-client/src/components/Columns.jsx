@@ -77,32 +77,26 @@ export const columns = [
     },
   },
   {
-    accessorKey: 'owner.username',
+    id: 'owner',
+    accessorFn: (row) => row?.owner?.username || null,
     header: () => (
       <div className="flex items-center gap-2">
         <UserIcon className="h-4 w-4 text-muted-foreground" />
         <span>Owner</span>
       </div>
     ),
-    cell: ({ row }) => {
-      const email = row.getValue('owner.username')
-      if (!email) return <span className="text-muted-foreground">—</span>
+    cell: ({ getValue }) => {
+      const email = getValue()
 
-      // Extract username part from email (before @)
-      const username = email.split('@')[0]
-      const domain = email.split('@')[1]
+      if (!email) {
+        return <span className="text-muted-foreground">—</span>
+      }
 
+      // Simplify the display to just show the email
       return (
-        <div className="flex items-center">
-          <div className="flex items-center gap-1">
-            <MailIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            <div className="flex flex-col">
-              <span className="font-medium text-sm">{username}</span>
-              <span className="text-xs text-muted-foreground">
-                @{domain || ''}
-              </span>
-            </div>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <MailIcon className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-sm">{email}</span>
         </div>
       )
     },

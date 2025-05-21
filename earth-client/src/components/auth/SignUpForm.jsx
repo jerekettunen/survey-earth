@@ -42,7 +42,6 @@ const SignUpForm = () => {
       })
     },
     onCompleted: (data) => {
-      console.log('User created successfully:', data)
       showSuccess('User created successfully', {
         description: 'You can now log in with your new account.',
         duration: 5000,
@@ -52,7 +51,6 @@ const SignUpForm = () => {
   })
 
   const onSubmit = async (data) => {
-    console.log('Form submitted:', data)
     createUser({
       variables: {
         username: data.username,

@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Calendar, CloudRain, Layers } from 'lucide-react'
 import { format } from 'date-fns'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { parseDate, isValidDate } from '@/utils/helper'
 
 const SatelliteImageViewer = ({
   projectId,
@@ -66,11 +67,15 @@ const SatelliteImageViewer = ({
         <div className="flex items-center space-x-2">
           <Calendar className="h-4 w-4" />
           <span className="text-sm text-muted-foreground">
-            {image.date ? format(new Date(image.date), 'PPP') : 'Unknown date'}
+            {image.date && isValidDate(image.date)
+              ? format(parseDate(image.date), 'PPP')
+              : 'Unknown date'}
           </span>
           <Badge variant="secondary" className="flex items-center gap-1">
             <CloudRain className="h-3 w-3" />
-            {Math.round(image.cloudCoverage)}% cloud cover
+            {typeof image.cloudCoverage === 'number'
+              ? `${Math.round(image.cloudCoverage)}% cloud cover`
+              : 'Unknown cloud cover'}
           </Badge>
         </div>
 
@@ -98,7 +103,11 @@ const SatelliteImageViewer = ({
               <div className="aspect-square w-full relative">
                 <img
                   src={image.url}
-                  alt={`Satellite image from ${format(new Date(image.date), 'PPP')}`}
+                  alt={`Satellite image from ${
+                    image.date && isValidDate(image.date)
+                      ? format(parseDate(image.date), 'PPP')
+                      : 'Unknown date'
+                  }`}
                   className="object-cover w-full h-full"
                   loading="lazy"
                 />
@@ -114,7 +123,11 @@ const SatelliteImageViewer = ({
         <DialogContent className="max-w-screen-lg w-full p-0">
           <img
             src={image.url}
-            alt={`Satellite image from ${format(new Date(image.date), 'PPP')}`}
+            alt={`Satellite image from ${
+              image.date && isValidDate(image.date)
+                ? format(parseDate(image.date), 'PPP')
+                : 'Unknown date'
+            }`}
             className="w-full h-auto"
           />
         </DialogContent>
