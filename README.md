@@ -67,32 +67,6 @@ The application is deployed using AWS services:
 
 Deployment is automated via GitHub Actions which builds, tests, and deploys changes when code is pushed to the main branch.
 
-## Use of AI in this project
-
-### AI-Assisted Areas
-
-- **UI Component Refinement**: AI helped improve styling and responsiveness of complex components like satellite image timeline and map views. All components were initially designed by me before seeking AI refinement. The landing page was especially helped with.
-
-- **Testing**: AI was used to generate boilerplate based on previous written tests and give suggestions on trickier testing scenarios.
-
-- **Debugging Assistance**: When encountering complex bugs, I used AI to analyze problems and suggest potential solutions.
-
-- **Complex features**: AI was used as a pair programmer to find and suggest solution when writing more complex features to help gather information and knowledge and help with learning.
-
-### Where AI Was Not Used
-
-- **Core Architecture**: All system design decisions and architectural patterns were implemented independently.
-
-- **Business Logic**: Critical application logic, especially project management and collaboration features, was written without AI assistance.
-
-- **Data Models**: Database schemas and GraphQL types were designed based on my own.
-
-- **Security Implementation**: Authentication flows and authorization checks were implemented manually based on course material and further research.
-
-### Approach to AI Use
-
-I approached AI as a learning tool rather than a solution generator, often asking for explanations of suggested code to deepen my understanding. This allowed to maintain full ownership of the codebase while leveraging AI to accelerate learning in areas with less experience, particularly satellite imagery processing and AWS deployment configurations.
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
