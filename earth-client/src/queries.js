@@ -12,7 +12,10 @@ const PROJECT_FIELDS = gql`
     startDate
     endDate
     createdAt
-    owner
+    owner {
+      id
+      username
+    }
     collaborators {
       user {
         id
