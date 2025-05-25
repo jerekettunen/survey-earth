@@ -11,12 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Calendar, CloudRain, Search, Layers } from 'lucide-react'
+
+import { CloudRain, Search, Layers } from 'lucide-react'
 import { format, subDays } from 'date-fns'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
+
+import RetryImage from './RetryImage'
 
 const SatelliteImageTimeline = ({
   projectId,
@@ -165,11 +167,13 @@ const SatelliteImageTimeline = ({
                 >
                   <CardContent className="p-0">
                     <div className="aspect-square relative">
-                      <img
+                      <RetryableImage
                         src={image.thumbnail || image.url}
                         alt={`Thumbnail from ${format(new Date(image.date), 'PP')}`}
                         className="object-cover w-full h-full"
-                        loading="lazy"
+                        fallbackSrc="/placeholder-thumbnail.svg"
+                        maxRetries={4}
+                        retryDelay={800}
                       />
                       <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white p-1">
                         <div className="text-xs flex items-center justify-between">
