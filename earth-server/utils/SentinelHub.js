@@ -1,6 +1,10 @@
 /* eslint-disable @stylistic/js/indent */
 const axios = require('axios')
 require('dotenv').config()
+const AWS = require('aws-sdk')
+const s3 = new AWS.S3()
+const BUCKET_NAME = process.env.S3_THUMB_BUCKET_NAME || null
+const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN || null
 
 // SentinelHub OAuth credentials
 const clientId = process.env.SENTINEL_HUB_CLIENT_ID
@@ -365,29 +369,42 @@ const generateThumbnailUrl = async ({
       {
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'image/jpeg', // Match the requested format
+          Accept: 'image/jpeg',
           Authorization: `Bearer ${token}`,
         },
         responseType: 'arraybuffer',
       }
     )
 
-    // Convert binary response to base64 for direct image URL
-    const base64 = Buffer.from(response.data).toString('base64')
-    return `data:image/jpeg;base64,${base64}`
+    // Create a safe key for S3
+    const safeImageId = imageId.replace(/[^a-zA-Z0-9-_]/g, '_')
+    const key = `thumbnails/${safeImageId}_${bandCombination}_${width}x${height}.jpg`
+
+    try {
+      await s3
+        .putObject({
+          Bucket: BUCKET_NAME,
+          Key: key,
+          Body: response.data,
+          ContentType: 'image/jpeg',
+          CacheControl: 'max-age=31536000', // Cache for 1 year
+        })
+        .promise()
+
+      // Return CloudFront URL
+      const url = `https://${CLOUDFRONT_DOMAIN}/${key}`
+      console.log(`Stored thumbnail for ${imageId} at ${url}`)
+      return url
+    } catch (s3Error) {
+      // Fallback to base64 if S3 upload fails
+      console.error(
+        `S3 upload failed, falling back to base64: ${s3Error.message}`
+      )
+      const base64 = Buffer.from(response.data).toString('base64')
+      return `data:image/jpeg;base64,${base64}`
+    }
   } catch (error) {
     console.error('Error generating thumbnail:', error.message)
-    if (error.response) {
-      console.error(`Status: ${error.response.status}`)
-      if (error.response.data) {
-        try {
-          const errorMsg = Buffer.from(error.response.data).toString('utf8')
-          console.error('Error details from Sentinel Hub:', errorMsg)
-        } catch (e) {
-          console.error('Could not parse error response', e)
-        }
-      }
-    }
     throw new Error(`Failed to generate thumbnail: ${error.message}`)
   }
 }

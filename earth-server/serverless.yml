@@ -7,6 +7,13 @@ provider:
   stage: ${opt:stage, 'dev'}
   memorySize: 1024
   timeout: 30
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource:
+        - arn:aws:s3:::${env:S3_THUMB_BUCKET_NAME}/*
   environment:
     MONGODB_URI: ${env:MONGODB_URI}
     JWT_SECRET: ${env:JWT_SECRET}
@@ -15,6 +22,8 @@ provider:
     SENTINEL_HUB_CLIENT_ID: ${env:SENTINEL_HUB_CLIENT_ID}
     SENTINEL_HUB_CLIENT_SECRET: ${env:SENTINEL_HUB_CLIENT_SECRET}
     SENTINEL_HUB_INSTANCE_ID: ${env:SENTINEL_HUB_INSTANCE_ID}
+    S3_THUMB_BUCKET_NAME: ${env:S3_THUMB_BUCKET_NAME}
+    CLOUDFRONT_DOMAIN: ${env:CLOUDFRONT_DOMAIN}
 
 functions:
   api:

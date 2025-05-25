@@ -86,6 +86,8 @@ jobs:
           SENTINEL_HUB_CLIENT_SECRET: ${{ secrets.SENTINEL_HUB_CLIENT_SECRET }}
           SENTINEL_HUB_INSTANCE_ID: ${{ secrets.SENTINEL_HUB_INSTANCE_ID }}
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          S3_THUMB_BUCKET_NAME: ${{ secrets.S3_THUMB_BUCKET_NAME }}
+          CLOUDFRONT_DOMAIN: ${{ secrets.CLOUDFRONT_DOMAIN }}
 
   # Test and deploy frontend only if frontend files changed
   test-frontend:

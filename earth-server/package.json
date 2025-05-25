@@ -17,6 +17,7 @@
     "@graphql-tools/schema": "^9.0.15",
     "@sentinel-hub/sentinelhub-js": "^0.8.11",
     "@turf/turf": "^7.2.0",
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
@@ -51,7 +52,7 @@
     "jest": "29.7.0",
     "mongodb-memory-server": "^9.1.6",
     "nock": "^13.5.1",
-    "supertest": "^7.1.0",
-    "serverless-offline": "^14.4.0"
+    "serverless-offline": "^14.4.0",
+    "supertest": "^7.1.0"
   }
 }
