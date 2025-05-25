@@ -396,7 +396,9 @@ const generateThumbnailUrl = async ({
       )
 
       // Return CloudFront URL
-      const url = `https://${CLOUDFRONT_DOMAIN}/${key}`
+      const url = CLOUDFRONT_DOMAIN.startsWith('http')
+        ? `${CLOUDFRONT_DOMAIN}/${key}`
+        : `https://${CLOUDFRONT_DOMAIN}/${key}`
       console.log(`Stored thumbnail for ${imageId} at ${url}`)
       return url
     } catch (s3Error) {
