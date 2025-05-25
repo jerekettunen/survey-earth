@@ -14,10 +14,10 @@
   "license": "MIT",
   "dependencies": {
     "@apollo/server": "^4.3.2",
+    "@aws-sdk/client-s3": "^3.817.0",
     "@graphql-tools/schema": "^9.0.15",
     "@sentinel-hub/sentinelhub-js": "^0.8.11",
     "@turf/turf": "^7.2.0",
-    "aws-sdk": "^2.1692.0",
     "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",

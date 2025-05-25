@@ -1,8 +1,8 @@
 /* eslint-disable @stylistic/js/indent */
 const axios = require('axios')
 require('dotenv').config()
-const AWS = require('aws-sdk')
-const s3 = new AWS.S3({ region: 'eu-north-1' })
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
+const s3Client = new S3Client({ region: 'eu-north-1' })
 const BUCKET_NAME = process.env.S3_THUMB_BUCKET_NAME || null
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN || null
 
@@ -385,15 +385,15 @@ const generateThumbnailUrl = async ({
     const key = `thumbnails/${safeImageId}_${bandCombination}_${width}x${height}.jpg`
 
     try {
-      await s3
-        .putObject({
+      await s3Client.send(
+        new PutObjectCommand({
           Bucket: BUCKET_NAME,
           Key: key,
           Body: response.data,
           ContentType: 'image/jpeg',
-          CacheControl: 'max-age=31536000', // Cache for 1 year
+          CacheControl: 'max-age=31536000',
         })
-        .promise()
+      )
 
       // Return CloudFront URL
       const url = `https://${CLOUDFRONT_DOMAIN}/${key}`
