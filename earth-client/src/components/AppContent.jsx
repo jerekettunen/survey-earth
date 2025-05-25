@@ -39,19 +39,19 @@ const AppContent = () => {
           </>
         ) : (
           // Show only login when not logged in
-          <div className="absolute top-3 right-3 flex gap-2 z-50">
+          <div className="absolute top-3 right-3 flex flex-col sm:flex-row gap-2 z-50">
             <ModeToggle />
             <Button
               asChild
               variant="ghost"
-              className="bg-blue-900/50 hover:bg-blue-900/70 text-white border border-blue-400/30 backdrop-blur-sm"
+              className="bg-blue-900/50 hover:bg-blue-900/70 text-white border border-blue-400/30 backdrop-blur-sm text-xs sm:text-sm whitespace-nowrap"
             >
               <Link to="/">Home</Link>
             </Button>
             <Button
               asChild
               variant="ghost"
-              className="bg-blue-900/50 hover:bg-blue-900/70 text-white border border-blue-400/30 backdrop-blur-sm"
+              className="bg-blue-900/50 hover:bg-blue-900/70 text-white border border-blue-400/30 backdrop-blur-sm text-xs sm:text-sm whitespace-nowrap"
             >
               <Link to="/login">Login</Link>
             </Button>
