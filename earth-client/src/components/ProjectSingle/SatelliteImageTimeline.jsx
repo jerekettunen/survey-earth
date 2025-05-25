@@ -167,7 +167,7 @@ const SatelliteImageTimeline = ({
                 >
                   <CardContent className="p-0">
                     <div className="aspect-square relative">
-                      <RetryableImage
+                      <RetryImage
                         src={image.thumbnail || image.url}
                         alt={`Thumbnail from ${format(new Date(image.date), 'PP')}`}
                         className="object-cover w-full h-full"
