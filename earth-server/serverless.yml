@@ -44,6 +44,13 @@ custom:
 package:
   patterns:
     - '!node_modules/aws-sdk/**'
+    - '!node_modules/@aws-sdk/**'
+    - '!node_modules/@smithy/**'
+    - '!node_modules/@aws-crypto/**'
+    - '!node_modules/fast-xml-parser/**'
+    - '!node_modules/.bin/**'
+    - '!node_modules/.cache/**'
+    - '!**/*.test.js'
     - '!node_modules/@smithy/**'
     - '!node_modules/@aws-crypto/**'
     - '!node_modules/fast-xml-parser/**'
