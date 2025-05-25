@@ -5,6 +5,14 @@ const serverless = require('serverless-http')
 let cachedServer
 
 exports.handler = async (event, context) => {
+  console.log('Lambda starting with event type:', typeof event)
+  console.log('Environment variables check:', {
+    NODE_ENV: process.env.NODE_ENV,
+    hasMongoURI: !!process.env.MONGODB_URI,
+    hasJWT: !!process.env.JWT_SECRET,
+    hasBucket: !!process.env.S3_THUMB_BUCKET_NAME,
+    hasCloudfront: !!process.env.CLOUDFRONT_DOMAIN,
+  })
   // Keep MongoDB connection alive between invocations
   context.callbackWaitsForEmptyEventLoop = false
 
