@@ -172,8 +172,8 @@ const SatelliteImageTimeline = ({
                         alt={`Thumbnail from ${format(new Date(image.date), 'PP')}`}
                         className="object-cover w-full h-full"
                         fallbackSrc="/placeholder-thumbnail.svg"
-                        maxRetries={4}
-                        retryDelay={1200}
+                        maxRetries={8}
+                        retryDelay={1500}
                       />
                       <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white p-1">
                         <div className="text-xs flex items-center justify-between">
