@@ -2,7 +2,7 @@
 const axios = require('axios')
 require('dotenv').config()
 const AWS = require('aws-sdk')
-const s3 = new AWS.S3()
+const s3 = new AWS.S3({ region: 'eu-north-1' })
 const BUCKET_NAME = process.env.S3_THUMB_BUCKET_NAME || null
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN || null
 
@@ -138,6 +138,10 @@ const generateImageUrl = async ({
   width = 512,
   height = 512,
 }) => {
+  console.log('Starting thumbnail generation with config:', {
+    bucketName: BUCKET_NAME || 'NOT CONFIGURED',
+    cloudfrontDomain: CLOUDFRONT_DOMAIN || 'NOT CONFIGURED',
+  })
   try {
     const token = await getAuthToken()
     const bands = getBandsForCombination(bandCombination)

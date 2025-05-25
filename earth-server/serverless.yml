@@ -12,6 +12,9 @@ provider:
       Action:
         - s3:PutObject
         - s3:GetObject
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
       Resource:
         - arn:aws:s3:::${env:S3_THUMB_BUCKET_NAME}/*
   environment:
